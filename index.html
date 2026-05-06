@@ -3,10 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0c0c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Wink 2.0</title>
 
-<!-- Gọi trực tiếp file icon.jpg bạn đã tải lên -->
+<!-- Icon cho trình duyệt -->
 <link rel="icon" type="image/jpeg" href="icon.jpg">
+<link rel="apple-touch-icon" href="icon.jpg">
+
+<!-- Cấu hình Manifest để cài đặt như APK Web (PWA) -->
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Wink%202.0%22,%22short_name%22:%22Wink%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c14%22,%22theme_color%22:%22%237c6af0%22,%22icons%22:[{%22src%22:%22icon.jpg%22,%22sizes%22:%22192x192%22,%22type%22:%22image/jpeg%22},{%22src%22:%22icon.jpg%22,%22sizes%22:%22512x512%22,%22type%22:%22image/jpeg%22}]}">
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,14 +43,11 @@ body {
   position: sticky; top: 0; z-index: 100;
   backdrop-filter: blur(10px);
 }
-
-/* Icon Miku trong Header */
 .logo-miku { 
   width: 32px; height: 32px; border-radius: 8px; 
   border: 1px solid var(--accent);
   object-fit: cover;
 }
-
 .header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
 
 .main-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
@@ -119,8 +123,7 @@ input[type=range]::-webkit-slider-thumb {
 <body>
 
 <div class="header">
-  <!-- Hiển thị ảnh miku trong ứng dụng -->
-  <img src="icon.jpg" class="logo-miku" onerror="this.style.display='none'">
+  <img src="icon.jpg" class="logo-miku" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%237c6af0%22/><text y=%22.9em%22 font-size=%2280%22 x=%225%22>✨</text></svg>'">
   <h1>Wink 2.0</h1>
 </div>
 
@@ -129,7 +132,7 @@ input[type=range]::-webkit-slider-thumb {
     <input type="file" id="fIn" accept="video/*" style="display:none">
     <div style="font-size: 40px; margin-bottom: 10px;">📁</div>
     <p style="font-weight: 600; font-size: 16px;">Chạm để chọn video</p>
-    <p style="color: var(--muted); font-size: 12px; margin-top: 5px;">Sắc nét hơn, nhanh hơn</p>
+    <p style="color: var(--muted); font-size: 12px; margin-top: 5px;">Sắc nét hơn, cài đặt như App</p>
   </div>
 
   <div class="app-layout" id="appUI">
@@ -170,7 +173,14 @@ input[type=range]::-webkit-slider-thumb {
 </div>
 
 <script>
-// Logic WebGL và xử lý video
+// Đăng ký Service Worker cơ bản để cho phép cài đặt (PWA)
+if ('serviceWorker' in navigator) {
+  const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
+  const blob = new Blob([swCode], {type: 'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob));
+}
+
+// Logic xử lý video và WebGL giữ nguyên
 const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
 const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
 const exBtn = document.getElementById('exBtn'), pBox = document.getElementById('pBox');
