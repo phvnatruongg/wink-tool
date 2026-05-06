@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="manifest" href="manifest.json">
-<title>Wink 2.0 Pro - Ultimate UI</title>
+<!-- Sửa tên và thêm Favicon để không còn quả địa cầu -->
+<title>Wink 2.0</title>
+<link rel="icon" type="image/jpeg" href="https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -22,7 +23,6 @@ body {
   color: var(--text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
-  /* Quan trọng: Cho phép cuộn tự nhiên để không mất nút */
   overflow-y: auto; 
   padding-bottom: 30px;
 }
@@ -39,7 +39,7 @@ body {
 
 .main-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 
-/* Upload Card xịn */
+/* Upload Card */
 .upload-card {
   background: var(--surface);
   border: 2px dashed var(--border);
@@ -47,15 +47,13 @@ body {
   padding: 60px 20px;
   text-align: center;
   cursor: pointer;
-  transition: 0.3s;
 }
-.upload-card:active { border-color: var(--accent); background: rgba(124, 106, 240, 0.05); }
 
-/* Layout App chính */
+/* Layout App */
 .app-layout { display: none; flex-direction: column; gap: 20px; }
 .app-layout.active { display: flex; }
 
-/* VIDEO PREVIEW: To và nét */
+/* VIDEO PREVIEW */
 .video-card {
   background: #000;
   border-radius: 20px;
@@ -63,7 +61,6 @@ body {
   position: relative;
   width: 100%;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  /* Tự động điều chỉnh theo video, nhưng không quá ngắn */
   min-height: 250px;
 }
 canvas { width: 100%; height: auto; display: block; max-height: 70vh; object-fit: contain; }
@@ -76,7 +73,7 @@ canvas { width: 100%; height: auto; display: block; max-height: 70vh; object-fit
   backdrop-filter: blur(5px); border: 1px solid var(--border);
 }
 
-/* BẢNG ĐIỀU KHIỂN: Giữ nguyên UI bản 2.0 */
+/* BẢNG ĐIỀU KHIỂN */
 .controls-card {
   background: var(--surface);
   border-radius: 24px;
@@ -99,7 +96,6 @@ input[type=range]::-webkit-slider-thumb {
   box-shadow: 0 0 10px rgba(124, 106, 240, 0.4); border: 4px solid var(--surface);
 }
 
-/* Nút bấm & Tiến trình */
 .actions { display: flex; flex-direction: column; gap: 12px; }
 .btn {
   padding: 16px; border-radius: 16px; border: none;
@@ -109,9 +105,7 @@ input[type=range]::-webkit-slider-thumb {
 .btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(124, 106, 240, 0.3); }
 .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 
-.prog-container {
-  display: none; background: var(--surface2); padding: 15px; border-radius: 16px;
-}
+.prog-container { display: none; background: var(--surface2); padding: 15px; border-radius: 16px; }
 .prog-container.active { display: block; }
 .bar-outer { height: 8px; background: #0c0c14; border-radius: 4px; margin: 10px 0; overflow: hidden; }
 .bar-inner { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s; }
@@ -120,59 +114,57 @@ input[type=range]::-webkit-slider-thumb {
 <body>
 
 <div class="header">
-  <img src="icon.jpg" class="logo-img" onerror="this.src='https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg'">
-  <h1>Wink 2.0 Pro</h1>
+  <img src="https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg" class="logo-img">
+  <h1>Wink 2.0</h1>
 </div>
 
 <div class="main-container">
   <div class="upload-card" id="upZone" onclick="document.getElementById('fIn').click()">
     <input type="file" id="fIn" accept="video/*" style="display:none">
-    <div style="font-size: 40px; margin-bottom: 10px;">🌌</div>
-    <p style="font-weight: 600; font-size: 16px;">Chọn video để nâng cấp</p>
-    <p style="color: var(--muted); font-size: 12px; margin-top: 5px;">Hỗ trợ WebGL & PWA Ready</p>
+    <div style="font-size: 40px; margin-bottom: 10px;">📁</div>
+    <p style="font-weight: 600; font-size: 16px;">Chạm để chọn video</p>
+    <p style="color: var(--muted); font-size: 12px; margin-top: 5px;">Sắc nét hơn, nhanh hơn</p>
   </div>
 
   <div class="app-layout" id="appUI">
     <div class="video-card">
       <canvas id="cv"></canvas>
-      <div class="badge" id="bdg">CHẾ ĐỘ: GỐC</div>
+      <div class="badge" id="bdg">GỐC</div>
     </div>
-
     <video id="vid" playsinline style="display:none"></video>
 
     <div class="controls-card">
       <div class="control-item">
-        <div class="label-row"><span>ĐỘ NÉT (SHARPEN)</span> <span class="val-num" id="v1">0.0</span></div>
+        <div class="label-row"><span>ĐỘ NÉT</span> <span class="val-num" id="v1">0.0</span></div>
         <input type="range" id="s1" min="0" max="5" step="0.1" value="0">
       </div>
-      
       <div class="control-item">
-        <div class="label-row"><span>CHI TIẾT CẠNH</span> <span class="val-num" id="v2">0.0</span></div>
+        <div class="label-row"><span>TƯƠNG PHẢN CẠNH</span> <span class="val-num" id="v2">0.0</span></div>
         <input type="range" id="s2" min="0" max="2" step="0.05" value="0">
       </div>
-
       <div class="control-item">
-        <div class="label-row"><span>KHỬ NHIỄU (DENOISE)</span> <span class="val-num" id="v3">0.0</span></div>
+        <div class="label-row"><span>GIẢM NHIỄU</span> <span class="val-num" id="v3">0.0</span></div>
         <input type="range" id="s3" min="0" max="1" step="0.05" value="0">
       </div>
     </div>
 
     <div class="prog-container" id="pBox">
       <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600;">
-        <span id="pLab">Đang xử lý...</span>
+        <span>Đang xuất video...</span>
         <span id="pPct">0%</span>
       </div>
       <div class="bar-outer"><div class="bar-inner" id="pFill"></div></div>
     </div>
 
     <div class="actions">
-      <button class="btn btn-primary" id="exBtn">🚀 XUẤT VIDEO SẮC NÉT</button>
-      <button class="btn btn-outline" onclick="location.reload()">ĐỔI VIDEO KHÁC</button>
+      <button class="btn btn-primary" id="exBtn">🚀 Xuất video .mp4</button>
+      <button class="btn btn-outline" onclick="location.reload()">Chọn video khác</button>
     </div>
   </div>
 </div>
 
 <script>
+// Logic WebGL giữ nguyên để đảm bảo tính năng
 const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
 const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
 const exBtn = document.getElementById('exBtn'), pBox = document.getElementById('pBox');
@@ -191,7 +183,7 @@ fIn.onchange = e => {
 [s1, s2, s3].forEach((s, i) => {
   s.oninput = () => {
     document.getElementById('v' + (i+1)).innerText = parseFloat(s.value).toFixed(1);
-    document.getElementById('bdg').innerText = (s1.value>0||s2.value>0||s3.value>0) ? "CHẾ ĐỘ: ĐÃ LỌC" : "CHẾ ĐỘ: GỐC";
+    document.getElementById('bdg').innerText = (s1.value>0||s2.value>0||s3.value>0) ? "ĐÃ LÀM NÉT" : "GỐC";
   };
 });
 
@@ -228,7 +220,7 @@ function render() {
   requestAnimationFrame(render);
 }
 
-exBtn.onclick = async () => {
+exBtn.onclick = () => {
   exBtn.disabled = true; pBox.classList.add('active');
   const stream = cv.captureStream(30);
   const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 });
@@ -244,7 +236,7 @@ exBtn.onclick = async () => {
     clearInterval(inv); rec.stop();
     rec.onstop = () => {
       const b = new Blob(chunks, {type:'video/mp4'});
-      const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='Wink2Pro_Enhanced.mp4'; a.click();
+      const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='Wink2_Enhanced.mp4'; a.click();
       exBtn.disabled = false; pBox.classList.remove('active');
     };
   };
