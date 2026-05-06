@@ -4,9 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0c0c14">
-<title>Wink 2.0 Pro</title>
+<title>Wink 2.0 Pro+</title>
 
-<!-- Thư viện nạp từ CDN nhanh hơn -->
+<link rel="icon" type="image/jpeg" href="icon.jpg">
+<link rel="apple-touch-icon" href="icon.jpg">
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Wink%202.0%22,%22short_name%22:%22Wink%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c14%22,%22theme_color%22:%22%237c6af0%22,%22icons%22:[{%22src%22:%22icon.jpg%22,%22sizes%22:%22192x192%22,%22type%22:%22image/jpeg%22}]}">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg/0.11.6/ffmpeg.min.js"></script>
 
 <style>
@@ -16,14 +19,13 @@
   --accent: #7c6af0; --accent2: #a695ff; --text: #e8e6f8;
   --muted: #8884a8; --border: #2a2840;
 }
-body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding-bottom: 40px; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding-bottom: 40px; overflow-x: hidden; }
 
-/* HEADER CÓ ICON */
+/* HEADER */
 .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
 .logo-miku { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--accent); object-fit: cover; }
-h1 { font-size: 1.2rem; font-weight: 700; }
 
-.main-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.main-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; max-width: 600px; margin: 0 auto; }
 .upload-card { background: var(--surface); border: 2px dashed var(--border); border-radius: 24px; padding: 60px 20px; text-align: center; cursor: pointer; }
 .app-layout { display: none; flex-direction: column; gap: 16px; }
 .app-layout.active { display: flex; }
@@ -38,15 +40,15 @@ canvas { width: 100%; height: auto; display: block; max-height: 60vh; }
 input[type=range] { -webkit-appearance: none; background: transparent; width: 100%; cursor: pointer; margin: 0; }
 input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; }
 input[type=range]::-webkit-slider-thumb { 
-    -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; 
-    background: var(--accent2); margin-top: -6px; box-shadow: 0 0 10px rgba(124,106,240,0.5); 
+    -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; 
+    background: var(--accent2); margin-top: -7px; box-shadow: 0 0 12px rgba(124,106,240,0.6); 
 }
 
 .controls-card { background: var(--surface); border-radius: 24px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 18px; }
 .label-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 .val-num { color: var(--accent2); font-weight: bold; }
 
-.btn { padding: 16px; border-radius: 16px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn { padding: 16px; border-radius: 16px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
 .btn-primary { background: var(--accent); color: white; width: 100%; }
 .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
 
@@ -68,6 +70,7 @@ input[type=range]::-webkit-slider-thumb {
     <input type="file" id="fIn" accept="video/*" style="display:none">
     <div style="font-size: 40px; margin-bottom: 10px;">🎥</div>
     <p style="font-weight: 600;">Chọn video để làm nét & xuất MP4</p>
+    <p style="font-size: 11px; color: #888; margin-top: 8px;">(Lần đầu vui lòng đợi 30s để nạp bộ xử lý)</p>
   </div>
 
   <div class="app-layout" id="appUI">
@@ -82,15 +85,13 @@ input[type=range]::-webkit-slider-thumb {
       </div>
     </div>
 
-    <video id="vid" playsinline style="display:none"></video>
-
     <div class="controls-card">
       <div>
         <div class="label-row"><span>ĐỘ NÉT</span> <span class="val-num" id="v1">1.0</span></div>
         <input type="range" id="s1" min="0" max="5" step="0.1" value="1.0">
       </div>
       <div>
-        <div class="label-row"><span>TƯƠNG PHẢN</span> <span class="val-num" id="v2">0.5</span></div>
+        <div class="label-row"><span>TƯƠNG PHẢN CẠNH</span> <span class="val-num" id="v2">0.5</span></div>
         <input type="range" id="s2" min="0" max="2" step="0.05" value="0.5">
       </div>
       <div>
@@ -112,11 +113,23 @@ input[type=range]::-webkit-slider-thumb {
   </div>
 </div>
 
+<video id="vid" playsinline style="display:none"></video>
+
 <script>
 const { createFFmpeg, fetchFile } = FFmpeg;
 const ffmpeg = createFFmpeg({ log: false });
 
-(async () => { try { await ffmpeg.load(); } catch(e) {} })();
+// TỰ ĐỘNG THỬ LẠI NẾU LỖI NẠP
+async function loadFFmpeg() {
+  try {
+    await ffmpeg.load();
+    console.log("FFmpeg Ready!");
+  } catch(e) {
+    console.log("Retrying FFmpeg...");
+    setTimeout(loadFFmpeg, 2000);
+  }
+}
+loadFFmpeg();
 
 const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
 const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
@@ -136,7 +149,12 @@ fIn.onchange = e => {
 };
 
 pBtn.onclick = () => { vid.paused ? vid.play() : vid.pause(); pBtn.innerText = vid.paused ? '▶':'⏸'; };
-vid.ontimeupdate = () => { if(!isDragging) { seek.value = vid.currentTime; document.getElementById('tDisp').innerText = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`; } };
+vid.ontimeupdate = () => { 
+  if(!isDragging) {
+    seek.value = vid.currentTime;
+    document.getElementById('tDisp').innerText = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`;
+  }
+};
 vid.onended = () => { seek.value = vid.duration; pBtn.innerText = '▶'; };
 
 let isDragging = false;
@@ -180,7 +198,7 @@ function render() {
 }
 
 exBtn.onclick = async () => {
-  if (!ffmpeg.isLoaded()) { alert("Đang nạp bộ xử lý, đợi tí bạn nhé!"); return; }
+  if (!ffmpeg.isLoaded()) { alert("Vui lòng đợi 30s để nạp xong bộ xử lý MP4!"); return; }
   exBtn.disabled = true; pBox.classList.add('active');
   const stream = cv.captureStream(30);
   const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
@@ -201,7 +219,7 @@ exBtn.onclick = async () => {
       const data = ffmpeg.FS('readFile', 'output.mp4');
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-      a.download = 'Wink_MP4.mp4'; a.click();
+      a.download = 'Wink_Pro.mp4'; a.click();
       pBox.classList.remove('active'); exBtn.disabled = false;
     };
   };
