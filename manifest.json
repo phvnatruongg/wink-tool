@@ -1,0 +1,21 @@
+{
+  "name": "Wink 2.0",
+  "short_name": "Wink 2.0",
+  "icons": [
+    {
+      "src": "https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ],
+  "theme_color": "#0c0c14",
+  "background_color": "#0c0c14",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait"
+}
