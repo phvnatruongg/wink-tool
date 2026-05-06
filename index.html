@@ -3,17 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="manifest" href="manifest.json">
-<!-- Thẻ này giúp hiện icon trên tab trình duyệt -->
-<link rel="icon" type="image/jpeg" href="icon.jpg">
-<link rel="apple-touch-icon" href="icon.jpg">
-<title>Wink 2.0</title>
+<title>Wink 2.0 - Big Preview</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #0c0c14;
   --surface: #14141f;
-  --surface2: #1c1c2e;
   --accent: #7c6af0;
   --text: #e8e6f8;
   --muted: #8884a8;
@@ -23,61 +18,60 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Segoe UI', system-ui, sans-serif;
-  height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 100vh;
 }
-/* Header khôi phục Miku & Tên app */
 .header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 10px 16px;
+  padding: 12px 16px;
   display: flex; align-items: center; gap: 10px;
-  flex-shrink: 0;
-  z-index: 10;
+  position: sticky; top: 0; z-index: 10;
 }
-.logo-img { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; }
-.header h1 { font-size: 16px; font-weight: 600; }
+.logo { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
+/* Vùng chứa chính */
 .main-content {
   flex: 1;
-  overflow-y: auto;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
-/* Vùng chọn video khôi phục kiểu cũ nhưng đẹp hơn */
+/* Upload Zone */
 .upload-zone {
   border: 2px dashed var(--border);
   border-radius: 16px;
   padding: 50px 20px;
   text-align: center;
   background: var(--surface);
-  position: relative;
-  cursor: pointer;
-}
-.upload-zone:active { background: var(--surface2); }
-.upload-zone input { 
-  position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; 
 }
 
-.preview-box { display: none; flex-direction: column; gap: 16px; }
+/* KHUNG VIDEO: Tối ưu để to nhất có thể */
+.preview-box { display: none; flex-direction: column; gap: 12px; }
 .preview-box.active { display: flex; }
 
 .canvas-wrapper {
   background: #000;
   border-radius: 12px;
-  overflow: hidden;
   position: relative;
-  aspect-ratio: 16/9;
-  max-height: 45vh;
+  width: 100%;
+  /* Cho phép video chiếm tới 60% chiều cao màn hình nếu cần */
+  max-height: 60vh; 
   display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
-canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+canvas {
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain; /* Đảm bảo video không bị méo */
+  display: block;
+}
 
+/* Controls chuẩn UI đầu tiên */
 .controls-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -89,49 +83,51 @@ canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
 }
 .ctrl-row { display: flex; flex-direction: column; gap: 8px; }
 .ctrl-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.ctrl-label strong { color: var(--text); }
 
 input[type=range] {
-  -webkit-appearance: none; width: 100%; height: 5px;
-  background: var(--surface2); border-radius: 4px;
+  -webkit-appearance: none; width: 100%; height: 6px;
+  background: #2a2840; border-radius: 4px; outline: none;
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 22px; height: 22px;
-  background: var(--accent); border-radius: 50%; border: 3px solid var(--bg);
+  background: var(--accent); border-radius: 50%; border: 3px solid #0c0c14;
 }
 
 .actions { display: flex; flex-direction: column; gap: 10px; padding-bottom: 30px; }
 .btn {
-  padding: 16px; border-radius: 14px; border: none; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 15px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer;
+  font-size: 15px; transition: 0.2s;
 }
-.btn-primary { background: var(--accent); color: white; font-size: 15px; }
+.btn-primary { background: var(--accent); color: white; }
 .btn-reset { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 
-#progBox { display: none; background: var(--surface); padding: 16px; border-radius: 12px; margin-bottom: 10px; }
-#progBox.active { display: block; }
-.bar-bg { height: 6px; background: var(--surface2); border-radius: 3px; margin: 10px 0; overflow: hidden; }
-.bar-fill { height: 100%; background: var(--accent); width: 0%; }
+.badge {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(0,0,0,0.6); padding: 4px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: bold;
+  color: #a695ff; border: 1px solid rgba(255,255,255,0.1);
+}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <img src="icon.jpg" class="logo-img" onerror="this.src='https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg'">
-  <h1>Wink 2.0</h1>
+  <div class="logo">✨</div>
+  <h1 style="font-size: 16px;">Làm Nét Video Pro</h1>
 </div>
 
 <div class="main-content">
-  <div class="upload-zone" id="uploadZone">
-    <input type="file" id="fileInput" accept="video/*">
-    <div style="font-size: 40px; margin-bottom: 10px;">📁</div>
-    <p style="font-weight: 600;">Chạm để chọn video</p>
-    <small style="color: var(--muted)">Sắc nét hơn, nhanh hơn</small>
+  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" accept="video/*" style="display:none">
+    <p>Chạm để chọn video</p>
+    <small style="color: var(--muted)">Tự động tối ưu độ nét WebGL</small>
   </div>
 
   <div class="preview-box" id="previewBox">
     <div class="canvas-wrapper">
       <canvas id="glCanvas"></canvas>
-      <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 8px; font-size: 11px; color: var(--accent);" id="badge">Gốc</div>
+      <div class="badge" id="badge">GỐC</div>
     </div>
 
     <video id="srcVideo" playsinline style="display:none"></video>
@@ -149,14 +145,6 @@ input[type=range]::-webkit-slider-thumb {
         <div class="ctrl-label"><strong>Giảm nhiễu</strong> <span id="v3">0.0</span></div>
         <input type="range" id="s3" min="0" max="1" step="0.05" value="0">
       </div>
-    </div>
-
-    <div id="progBox">
-      <div style="display:flex; justify-content:space-between; font-size:12px">
-        <span>Đang xuất video...</span>
-        <span id="pct">0%</span>
-      </div>
-      <div class="bar-bg"><div class="bar-fill" id="fill"></div></div>
     </div>
 
     <div class="actions">
@@ -179,14 +167,16 @@ fileInput.onchange = e => {
   video.onloadedmetadata = () => {
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('previewBox').classList.add('active');
-    initGL(); render(); video.play();
+    initGL();
+    render();
+    video.play();
   };
 };
 
 [s1, s2, s3].forEach((s, i) => {
   s.oninput = () => {
     document.getElementById('v' + (i+1)).innerText = parseFloat(s.value).toFixed(1);
-    document.getElementById('badge').innerText = (s1.value>0||s2.value>0||s3.value>0) ? "Đã lọc" : "Gốc";
+    document.getElementById('badge').innerText = (s1.value>0||s2.value>0||s3.value>0) ? "ĐÃ LÀM NÉT" : "GỐC";
   };
 });
 
@@ -197,7 +187,14 @@ function initGL() {
   gl.shaderSource(vs, `attribute vec2 p;attribute vec2 u;varying vec2 v;void main(){v=u;gl_Position=vec4(p,0,1);}`);
   gl.compileShader(vs);
   const fs = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fs, `precision mediump float;uniform sampler2D t;uniform vec2 r;uniform float s,e,n;varying vec2 v;void main(){vec2 px=1.0/r;vec4 o=texture2D(t,v);vec3 c=o.rgb;vec3 bl=texture2D(t,v-px).rgb*0.5+texture2D(t,v+px).rgb*0.5;if(n>0.0)c=mix(c,bl,n*0.5);if(s>0.0)c+=s*(c-bl);gl_FragColor=vec4(c,o.a);}`);
+  gl.shaderSource(fs, `precision mediump float;uniform sampler2D t;uniform vec2 r;uniform float s,e,n;varying vec2 v;
+    void main(){
+      vec2 px=1.0/r; vec4 o=texture2D(t,v); vec3 c=o.rgb;
+      vec3 bl=texture2D(t,v-px).rgb*0.5+texture2D(t,v+px).rgb*0.5;
+      if(n>0.0)c=mix(c,bl,n*0.5);
+      if(s>0.0)c+=s*(c-bl);
+      gl_FragColor=vec4(c,o.a);
+    }`);
   gl.compileShader(fs);
   program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program); gl.useProgram(program);
   const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -223,28 +220,17 @@ function render() {
   requestAnimationFrame(render);
 }
 
-document.getElementById('exportBtn').onclick = async () => {
-  const btn = document.getElementById('exportBtn');
-  btn.disabled = true;
-  document.getElementById('progBox').classList.add('active');
+document.getElementById('exportBtn').onclick = () => {
   const stream = canvas.captureStream(30);
   const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 });
   const chunks = [];
   rec.ondataavailable = e => chunks.push(e.data);
   video.currentTime = 0; video.play(); rec.start();
-  const inv = setInterval(() => {
-    const p = Math.round(video.currentTime / video.duration * 100);
-    document.getElementById('fill').style.width = p + '%';
-    document.getElementById('pct').innerText = p + '%';
-  }, 200);
-  video.onended = () => {
-    clearInterval(inv); rec.stop();
-    rec.onstop = () => {
-      const b = new Blob(chunks, {type:'video/mp4'});
-      const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='Wink2_Enhanced.mp4'; a.click();
-      btn.disabled = false; document.getElementById('progBox').classList.remove('active');
-    };
+  rec.onstop = () => {
+    const b = new Blob(chunks, {type:'video/mp4'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='Wink_Pro.mp4'; a.click();
   };
+  video.onended = () => rec.stop();
 };
 </script>
 </body>
