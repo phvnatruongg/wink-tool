@@ -4,148 +4,126 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="manifest" href="manifest.json">
-<title>Wink 2.0</title>
+<title>Wink 2.0 - Tối Ưu UI</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --bg: #0c0c14;
-  --surface: #14141f;
-  --surface2: #1c1c2e;
+  --surface: #1a1a2e;
+  --surface-lp: rgba(26, 26, 46, 0.8);
   --accent: #7c6af0;
-  --accent2: #a695ff;
   --text: #e8e6f8;
   --muted: #8884a8;
-  --border: #2a2840;
+  --border: rgba(255, 255, 255, 0.1);
 }
-
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', system-ui, sans-serif;
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-
-/* Header thu gọn */
+/* Header */
 .header {
-  background: var(--surface);
-  padding: 0.5rem 1rem;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
+.logo-img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
+.header h1 { font-size: 16px; font-weight: 600; }
 
-.logo-img { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; }
-.header h1 { font-size: 15px; font-weight: 600; }
-
-.body { flex: 1; display: flex; flex-direction: column; position: relative; }
-
-/* Khu vực Upload */
-.upload-zone {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 5; background: var(--bg);
-}
-
-.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-
-/* KHU VỰC VIDEO CHÍNH - CHIẾM TỐI ĐA DIỆN TÍCH */
-.preview-box {
+/* Upload Zone Xịn */
+.upload-container {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.upload-card {
+  width: 100%;
+  max-width: 320px;
+  padding: 40px 20px;
+  background: var(--surface);
+  border-radius: 24px;
+  border: 2px dashed var(--accent);
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.upload-card:active { transform: scale(0.98); background: rgba(124, 106, 240, 0.1); }
+.upload-card input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-icon { font-size: 48px; margin-bottom: 15px; display: block; }
+
+/* Giao diện chính sau khi chọn video */
+.main-layout {
   display: none;
   flex-direction: column;
   height: 100%;
 }
-.preview-box.active { display: flex; }
+.main-layout.active { display: flex; }
 
-.canvas-wrapper {
+/* Video chiếm diện tích hợp lý */
+.video-preview {
   flex: 1;
   background: #000;
   position: relative;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
 }
-
-canvas {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-video { display: none; }
-
+canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
 .badge {
-  position: absolute; top: 10px; right: 10px;
-  background: rgba(0,0,0,0.6);
-  padding: 2px 8px; border-radius: 4px; font-size: 10px; color: var(--accent2);
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,0.6); padding: 4px 10px;
+  border-radius: 8px; font-size: 11px; color: var(--accent);
+  backdrop-filter: blur(4px);
 }
 
-/* BẢNG ĐIỀU KHIỂN - THU GỌN XUỐNG DƯỚI */
-.controls-panel {
+/* Panel điều khiển bên dưới */
+.control-panel {
   background: var(--surface);
-  padding: 12px 16px env(safe-area-inset-bottom);
-  border-top: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 10px;
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
 }
-
-.ctrl-row {
-  display: flex; align-items: center; gap: 12px;
-}
-
-.ctrl-label {
-  font-size: 12px; color: var(--muted);
-  width: 80px; flex-shrink: 0;
-}
-
+.slider-group { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+.slider-item { display: flex; align-items: center; gap: 12px; }
+.slider-item label { font-size: 12px; color: var(--muted); width: 70px; }
 input[type=range] {
-  flex: 1; height: 4px; border-radius: 2px;
-  -webkit-appearance: none; background: var(--surface2);
+  flex: 1; height: 5px; border-radius: 10px;
+  background: #2d2d44; -webkit-appearance: none;
 }
-
 input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 18px; height: 18px;
-  background: var(--accent); border-radius: 50%; border: 2px solid var(--bg);
+  -webkit-appearance: none; width: 20px; height: 20px;
+  background: var(--accent); border-radius: 50%; border: 3px solid var(--surface);
 }
 
-/* Video Player Bar */
-.player-bar {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 5px;
-}
-
-.btn-play {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: white; display: flex; align-items: center; justify-content: center;
-}
-
-.time-track {
-  flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; position: relative;
-}
-.time-fill { height: 100%; background: var(--accent); width: 0%; }
-
-/* Nút Export to hơn */
-.actions { display: flex; gap: 8px; margin-top: 5px; }
-.btn-main {
-  flex: 1; padding: 12px; border-radius: 10px; border: none;
+/* Nút bấm */
+.action-bar { display: flex; gap: 10px; }
+.btn {
+  flex: 1; padding: 14px; border-radius: 14px; border: none;
   font-weight: 600; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-.btn-export { background: var(--accent); color: white; }
-.btn-reset { background: var(--surface2); color: var(--muted); width: 45px; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-secondary { background: #2d2d44; color: var(--muted); width: 60px; flex: none; }
 
-/* Progress Bar */
+/* Progress */
 .progress-overlay {
   display: none; position: absolute; inset: 0;
-  background: rgba(12,12,20,0.9);
-  z-index: 20; flex-direction: column; align-items: center; justify-content: center;
-  padding: 20px;
+  background: rgba(0,0,0,0.8); z-index: 10;
+  flex-direction: column; align-items: center; justify-content: center; padding: 30px;
 }
 .progress-overlay.active { display: flex; }
-.prog-bar { width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin: 10px 0; }
-.prog-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s; }
+.bar-bg { width: 100%; height: 6px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--accent); width: 0%; }
 </style>
 </head>
 <body>
@@ -155,160 +133,137 @@ input[type=range]::-webkit-slider-thumb {
   <h1>Wink 2.0</h1>
 </div>
 
-<div class="body">
-  <div class="upload-zone" id="uploadZone">
+<div class="upload-container" id="uploadArea">
+  <div class="upload-card">
     <input type="file" id="fileInput" accept="video/*">
-    <div style="font-size: 40px; margin-bottom: 10px;">📁</div>
-    <p>Chạm để chọn video</p>
+    <span class="upload-icon">✨</span>
+    <p style="font-weight: 600;">Làm nét video của bạn</p>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 5px;">Chạm để chọn file MP4, MOV...</p>
+  </div>
+</div>
+
+<div class="main-layout" id="mainUI">
+  <div class="video-preview">
+    <canvas id="glCanvas"></canvas>
+    <div class="badge" id="statusBadge">Chế độ: Gốc</div>
+    
+    <div class="progress-overlay" id="progOverlay">
+      <p id="progLabel">Đang xử lý...</p>
+      <div class="bar-bg"><div class="bar-fill" id="progFill"></div></div>
+      <p id="progPct" style="font-size: 13px;">0%</p>
+    </div>
   </div>
 
-  <div class="preview-box" id="previewBox">
-    <div class="canvas-wrapper">
-      <canvas id="glCanvas"></canvas>
-      <div class="badge" id="sharpBadge">Gốc</div>
-      
-      <div class="progress-overlay" id="progressOverlay">
-        <p id="progLabel">Đang xuất video...</p>
-        <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
-        <p id="progPct" style="font-size: 12px; color: var(--muted);">0%</p>
+  <video id="srcVideo" playsinline style="display:none"></video>
+
+  <div class="control-panel">
+    <div class="slider-group">
+      <div class="slider-item">
+        <label>Độ nét</label>
+        <input type="range" id="sharpSlider" min="0" max="5" step="0.1" value="0">
+      </div>
+      <div class="slider-item">
+        <label>Cạnh</label>
+        <input type="range" id="edgeSlider" min="0" max="2" step="0.05" value="0">
       </div>
     </div>
 
-    <video id="srcVideo" playsinline></video>
-
-    <div class="controls-panel">
-      <div class="player-bar">
-        <button class="btn-play" id="playBtn">▶</button>
-        <div class="time-track"><div class="time-fill" id="timeFill"></div></div>
-      </div>
-
-      <div class="ctrl-row">
-        <div class="ctrl-label">Độ nét</div>
-        <input type="range" id="sharpSlider" min="0" max="5" step="0.1" value="0">
-      </div>
-
-      <div class="ctrl-row">
-        <div class="ctrl-label">Cạnh</div>
-        <input type="range" id="edgeSlider" min="0" max="2" step="0.05" value="0">
-      </div>
-
-      <div class="actions">
-        <button class="btn-reset" id="resetBtn">↩</button>
-        <button class="btn-main btn-export" id="exportBtn">🚀 Xuất video .mp4</button>
-      </div>
+    <div class="action-bar">
+      <button class="btn btn-secondary" onclick="location.reload()">↩</button>
+      <button class="btn btn-primary" id="exportBtn">🚀 Xuất Video .MP4</button>
     </div>
   </div>
 </div>
 
 <script>
-// Giữ nguyên logic xử lý WebGL từ file cũ của bạn
-// Chỉ thay đổi cách cập nhật giao diện và các biến ID
+// Logic xử lý (giữ nguyên tinh hoa của bạn và tối ưu thêm)
 const video = document.getElementById('srcVideo');
 const canvas = document.getElementById('glCanvas');
 const fileInput = document.getElementById('fileInput');
-const uploadZone = document.getElementById('uploadZone');
-const previewBox = document.getElementById('previewBox');
+const uploadArea = document.getElementById('uploadArea');
+const mainUI = document.getElementById('mainUI');
 const sharpSlider = document.getElementById('sharpSlider');
 const edgeSlider = document.getElementById('edgeSlider');
-const playBtn = document.getElementById('playBtn');
-const timeFill = document.getElementById('timeFill');
 const exportBtn = document.getElementById('exportBtn');
-const resetBtn = document.getElementById('resetBtn');
-const progressOverlay = document.getElementById('progressOverlay');
-const progFill = document.getElementById('progFill');
-const progPct = document.getElementById('progPct');
+const badge = document.getElementById('statusBadge');
 
 let gl, program, texture, rafId;
-let uTexture, uResolution, uSharp, uEdge;
+let uSharp, uEdge;
 
-// ... (Các hàm initGL, compileShader, renderFrame tương tự file gốc của bạn)
-// Tôi rút gọn lại để bạn dễ dán, hãy copy phần script xử lý WebGL từ file cũ vào đây
-// Đảm bảo các hàm renderFrame sử dụng đúng ID slider mới
+fileInput.onchange = e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  video.src = URL.createObjectURL(file);
+  video.onloadedmetadata = () => {
+    uploadArea.style.display = 'none';
+    mainUI.classList.add('active');
+    initGL();
+    render();
+    video.play();
+  };
+};
 
 function initGL() {
   gl = canvas.getContext('webgl');
-  if (!gl) return false;
-  const vs = compileShader(gl.VERTEX_SHADER, `attribute vec2 a_pos; attribute vec2 a_uv; varying vec2 v_uv; void main() { v_uv = a_uv; gl_Position = vec4(a_pos, 0.0, 1.0); }`);
-  const fs = compileShader(gl.FRAGMENT_SHADER, `precision mediump float; uniform sampler2D u_tex; uniform vec2 u_res; uniform float u_sharp; uniform float u_edge; varying vec2 v_uv; void main() { vec2 px = 1.0 / u_res; vec4 orig = texture2D(u_tex, v_uv); vec3 col = orig.rgb; vec3 bl = (texture2D(u_tex,v_uv+vec2(-px.x,0)).rgb + texture2D(u_tex,v_uv+vec2(px.x,0)).rgb + texture2D(u_tex,v_uv+vec2(0,-px.y)).rgb + texture2D(u_tex,v_uv+vec2(0,px.y)).rgb)*0.25; if(u_sharp>0.0) col += u_sharp * (col - bl); gl_FragColor = vec4(clamp(col,0.0,1.0), orig.a); }`);
+  const vs = gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vs, `attribute vec2 p;attribute vec2 u;varying vec2 v;void main(){v=u;gl_Position=vec4(p,0,1);}`);
+  gl.compileShader(vs);
+  const fs = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(fs, `precision mediump float;uniform sampler2D t;uniform vec2 r;uniform float s;uniform float e;varying vec2 v;void main(){vec2 p=1.0/r;vec4 o=texture2D(t,v);vec3 c=o.rgb;vec3 bl=(texture2D(t,v-p).rgb+texture2D(t,v+p).rgb)*0.5;if(s>0.0)c+=s*(c-bl);gl_FragColor=vec4(c,o.a);}`);
+  gl.compileShader(fs);
   program = gl.createProgram();
   gl.attachShader(program, vs); gl.attachShader(program, fs);
   gl.linkProgram(program); gl.useProgram(program);
-  const verts = new Float32Array([-1,-1,0,1, 1,-1,1,1, -1,1,0,0, 1,1,1,0]);
-  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(program, 'a_pos'); const aUV = gl.getAttribLocation(program, 'a_uv');
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 16, 0); gl.vertexAttribPointer(aUV, 2, gl.FLOAT, false, 16, 8);
-  gl.enableVertexAttribArray(aPos); gl.enableVertexAttribArray(aUV);
-  uTexture = gl.getUniformLocation(program, 'u_tex'); uResolution = gl.getUniformLocation(program, 'u_res'); uSharp = gl.getUniformLocation(program, 'u_sharp');
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,0,1,1,-1,1,1,-1,1,0,0,1,1,1,0]), gl.STATIC_DRAW);
+  const p = gl.getAttribLocation(program, 'p'), u = gl.getAttribLocation(program, 'u');
+  gl.vertexAttribPointer(p,2,gl.FLOAT,0,16,0); gl.vertexAttribPointer(u,2,gl.FLOAT,0,16,8);
+  gl.enableVertexAttribArray(p); gl.enableVertexAttribArray(u);
+  uSharp = gl.getUniformLocation(program, 's'); uEdge = gl.getUniformLocation(program, 'e');
   texture = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  return true;
+  gl.texParameteri(gl.TEXTURE_2D, 10242, 33071); gl.texParameteri(gl.TEXTURE_2D, 10243, 33071);
+  gl.texParameteri(gl.TEXTURE_2D, 10241, 9729); gl.texParameteri(gl.TEXTURE_2D, 10240, 9729);
 }
 
-function compileShader(t, s) { const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh); return sh; }
-
-function renderFrame() {
-  if (video.readyState < 2) { rafId = requestAnimationFrame(renderFrame); return; }
+function render() {
+  if(video.readyState < 2) { rafId = requestAnimationFrame(render); return; }
   canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-  gl.uniform2f(uResolution, canvas.width, canvas.height);
-  gl.uniform1f(uSharp, parseFloat(sharpSlider.value));
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  if (!video.paused) timeFill.style.width = (video.currentTime / video.duration * 100) + '%';
-  rafId = requestAnimationFrame(renderFrame);
+  gl.viewport(0,0,canvas.width,canvas.height);
+  gl.texImage2D(gl.TEXTURE_2D,0,6408,6408,5121,video);
+  gl.uniform2f(gl.getUniformLocation(program,'r'), canvas.width, canvas.height);
+  gl.uniform1f(uSharp, sharpSlider.value);
+  gl.uniform1f(uEdge, edgeSlider.value);
+  gl.drawArrays(5,0,4);
+  badge.innerText = (sharpSlider.value > 0 || edgeSlider.value > 0) ? "Chế độ: Đã làm nét" : "Chế độ: Gốc";
+  rafId = requestAnimationFrame(render);
 }
 
-fileInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  video.src = URL.createObjectURL(file);
-  video.onloadedmetadata = () => {
-    uploadZone.style.display = 'none';
-    previewBox.classList.add('active');
-    if (!gl) initGL();
-    renderFrame();
-    video.play();
-  };
-});
-
-playBtn.addEventListener('click', () => {
-  if (video.paused) { video.play(); playBtn.textContent = '⏸'; }
-  else { video.pause(); playBtn.textContent = '▶'; }
-});
-
-resetBtn.addEventListener('click', () => location.reload());
-
-exportBtn.addEventListener('click', async () => {
+exportBtn.onclick = async () => {
   exportBtn.disabled = true;
-  progressOverlay.classList.add('active');
+  const overlay = document.getElementById('progOverlay');
+  overlay.classList.add('active');
   const stream = canvas.captureStream(30);
   const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 });
   const chunks = [];
   rec.ondataavailable = e => chunks.push(e.data);
   video.currentTime = 0; video.play(); rec.start();
   
-  const intv = setInterval(() => {
+  const inv = setInterval(() => {
     const p = Math.round(video.currentTime / video.duration * 100);
-    progFill.style.width = p + '%';
-    progPct.textContent = p + '%';
+    document.getElementById('progFill').style.width = p + '%';
+    document.getElementById('progPct').innerText = p + '%';
   }, 100);
 
   video.onended = () => {
-    clearInterval(intv);
-    rec.stop();
+    clearInterval(inv); rec.stop();
     rec.onstop = () => {
       const blob = new Blob(chunks, { type: 'video/mp4' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'Wink2_Fixed.mp4';
-      a.click();
-      progressOverlay.classList.remove('active');
-      exportBtn.disabled = false;
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'Wink2_Enhanced.mp4'; a.click();
+      overlay.classList.remove('active'); exportBtn.disabled = false;
     };
   };
-});
+};
 </script>
 </body>
 </html>
