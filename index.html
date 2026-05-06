@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<!-- Sửa tên và thêm Favicon để không còn quả địa cầu -->
 <title>Wink 2.0</title>
-<link rel="icon" type="image/jpeg" href="https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg">
+
+<!-- Gọi trực tiếp file icon.jpg bạn đã tải lên -->
+<link rel="icon" type="image/jpeg" href="icon.jpg">
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -34,12 +36,18 @@ body {
   position: sticky; top: 0; z-index: 100;
   backdrop-filter: blur(10px);
 }
-.logo-img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; border: 1px solid var(--accent); }
+
+/* Icon Miku trong Header */
+.logo-miku { 
+  width: 32px; height: 32px; border-radius: 8px; 
+  border: 1px solid var(--accent);
+  object-fit: cover;
+}
+
 .header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
 
 .main-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 
-/* Upload Card */
 .upload-card {
   background: var(--surface);
   border: 2px dashed var(--border);
@@ -49,11 +57,9 @@ body {
   cursor: pointer;
 }
 
-/* Layout App */
 .app-layout { display: none; flex-direction: column; gap: 20px; }
 .app-layout.active { display: flex; }
 
-/* VIDEO PREVIEW */
 .video-card {
   background: #000;
   border-radius: 20px;
@@ -73,7 +79,6 @@ canvas { width: 100%; height: auto; display: block; max-height: 70vh; object-fit
   backdrop-filter: blur(5px); border: 1px solid var(--border);
 }
 
-/* BẢNG ĐIỀU KHIỂN */
 .controls-card {
   background: var(--surface);
   border-radius: 24px;
@@ -114,7 +119,8 @@ input[type=range]::-webkit-slider-thumb {
 <body>
 
 <div class="header">
-  <img src="https://r2.erweima.ai/i/p7vKqZ6mS56VAs6K6mQ06A.jpg" class="logo-img">
+  <!-- Hiển thị ảnh miku trong ứng dụng -->
+  <img src="icon.jpg" class="logo-miku" onerror="this.style.display='none'">
   <h1>Wink 2.0</h1>
 </div>
 
@@ -164,7 +170,7 @@ input[type=range]::-webkit-slider-thumb {
 </div>
 
 <script>
-// Logic WebGL giữ nguyên để đảm bảo tính năng
+// Logic WebGL và xử lý video
 const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
 const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
 const exBtn = document.getElementById('exBtn'), pBox = document.getElementById('pBox');
