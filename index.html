@@ -6,15 +6,17 @@
 <meta name="theme-color" content="#ee4d2d">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Wink 2.0 PRO + Sound</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Wink 2.0 PRO</title>
 
-<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIldpbmsgMi4wIFBSTyIsCiAgInNob3J0X25hbWUiOiAiV2luayIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGMwYzE0IiwKICAidGhlbWVfY29sb3IiOiAiI2VlNGQyZCIKfQ==">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Wink 2.0 PRO","short_name":"Wink","start_url":".","display":"standalone","background_color":"#0c0c14","theme_color":"#ee4d2d","icons":[{"src":"icon.jpg","sizes":"192x192","type":"image/jpeg"}]}'>
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg: #0c0c14; --surface: #14141f; --accent: #ee4d2d; --text: #e8e6f8; --border: #2a2840; }
 body { background: var(--bg); color: var(--text); font-family: sans-serif; overflow-y: auto; min-height: 100vh; }
 
+/* UI chuẩn bản cũ bạn thích */
 .header { background: var(--surface); padding: 12px 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
 .logo { width: 35px; height: 35px; border-radius: 8px; border: 1px solid var(--accent); object-fit: cover; }
 .header h2 { font-size: 1.1rem; }
@@ -25,7 +27,7 @@ canvas { width: 100%; border-radius: 12px; background: #000; display: block; }
 
 .video-ctrl { margin: 15px 0; }
 .ctrl-row { display: flex; align-items: center; gap: 10px; }
-#playBtn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; min-width: 40px; }
+#playBtn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; min-width: 40px; outline: none; }
 .seek-bar { flex-grow: 1; height: 8px; background: #333; border-radius: 4px; overflow: hidden; cursor: pointer; }
 .seek-fill { height: 100%; background: var(--accent); width: 0%; }
 .time-display { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-top: 6px; font-family: monospace; }
@@ -34,11 +36,12 @@ canvas { width: 100%; border-radius: 12px; background: #000; display: block; }
 .label-row { display: flex; justify-content: space-between; font-size: 13px; color: #bbb; margin-bottom: 8px; }
 input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
 
-.btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
+.btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.2s; }
 .btn-primary { background: var(--accent); color: white; }
 .btn-outline { background: transparent; border: 1px solid #444; color: #aaa; }
+.btn:active { transform: scale(0.98); }
 
-#status { font-size: 14px; color: #aaa; text-align: center; margin: 15px 0; }
+#status { font-size: 14px; color: #aaa; text-align: center; margin: 15px 0; font-style: italic; }
 .prog-bar { height: 8px; background: #000; border-radius: 4px; display: none; overflow: hidden; }
 .prog-fill { height: 100%; background: var(--accent); width: 0%; transition: 0.1s; }
 </style>
@@ -46,7 +49,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
 <body>
 
 <div class="header">
-    <img src="icon.jpg" class="logo" alt="Icon">
+    <img src="icon.jpg" class="logo" alt="Icon" onerror="this.src='https://via.placeholder.com/35/ee4d2d/ffffff?text=W'">
     <h2>Wink 2.0 <span style="color:var(--accent)">PRO</span></h2>
 </div>
 
@@ -89,16 +92,17 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
 <video id="vid" playsinline style="display:none"></video>
 
 <script>
-// Cấu hình Cloudinary
-const CLOUD_NAME = "dmd2j39iz", UPLOAD_PRESET = "wink_preset"; 
-
-// Service Worker giả lập để Note 9 nhận diện PWA
+// 1. ĐĂNG KÝ SERVICE WORKER ĐỂ KÍCH HOẠT CHẾ ĐỘ CÀI ĐẶT APP (PWA)
 if ('serviceWorker' in navigator) {
-    const sw = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
-    const blob = new Blob([sw], {type: 'text/javascript'});
+    const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+    `;
+    const blob = new Blob([swCode], { type: 'text/javascript' });
     navigator.serviceWorker.register(URL.createObjectURL(blob));
 }
 
+const CLOUD_NAME = "dmd2j39iz", UPLOAD_PRESET = "wink_preset"; 
 const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
 const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
 const startBtn = document.getElementById('startBtn'), status = document.getElementById('status'), pFill = document.getElementById('pFill'), pBar = document.getElementById('pBar');
@@ -107,8 +111,8 @@ const curTimeText = document.getElementById('curTime'), durTimeText = document.g
 
 let gl, program, tex;
 
-// Định dạng thời gian 00:00
 function formatTime(t) {
+    if (isNaN(t)) return "00:00";
     const m = Math.floor(t / 60).toString().padStart(2, '0');
     const s = Math.floor(t % 60).toString().padStart(2, '0');
     return m + ":" + s;
@@ -137,7 +141,10 @@ vid.ontimeupdate = () => {
     curTimeText.innerText = formatTime(vid.currentTime);
 };
 
-seekBar.onclick = e => vid.currentTime = ((e.clientX - seekBar.getBoundingClientRect().left) / seekBar.offsetWidth) * vid.duration;
+seekBar.onclick = e => {
+    const rect = seekBar.getBoundingClientRect();
+    vid.currentTime = ((e.clientX - rect.left) / rect.width) * vid.duration;
+};
 
 s1.oninput = () => document.getElementById('v1').innerText = s1.value;
 s2.oninput = () => document.getElementById('v2').innerText = s2.value;
@@ -176,29 +183,27 @@ function initGL() {
 startBtn.onclick = async () => {
     startBtn.disabled = true; pBar.style.display = 'block';
     
-    // Thu hình từ Canvas và tiếng trực tiếp từ thẻ Video
     const stream = cv.captureStream(30);
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const source = audioCtx.createMediaElementSource(vid);
     const dest = audioCtx.createMediaStreamDestination();
     source.connect(dest);
     source.connect(audioCtx.destination);
-    
     dest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
     
-    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12000000 });
+    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 15000000 });
     const chunks = []; 
     rec.ondataavailable = e => chunks.push(e.data);
     
     vid.currentTime = 0; 
-    vid.muted = false; // Mở tiếng để thu
+    vid.muted = false; 
     vid.play(); 
     rec.start();
 
     const inv = setInterval(() => {
         let p = (vid.currentTime / vid.duration) * 100;
         pFill.style.width = (p * 0.5) + '%';
-        status.innerText = `Đang xử lý video & tiếng: ${Math.round(p)}%`;
+        status.innerText = `Đang render video & tiếng: ${Math.round(p)}%`;
     }, 100);
 
     vid.onended = () => {
@@ -209,13 +214,16 @@ startBtn.onclick = async () => {
             fd.append('file', new Blob(chunks, {type:'video/webm'})); 
             fd.append('upload_preset', UPLOAD_PRESET);
             
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {method:'POST', body:fd}).then(r=>r.json());
-            const a = document.createElement('a'); 
-            a.href = res.secure_url.replace('.webm', '.mp4'); 
-            a.download = "Wink_Pro_Final.mp4"; 
-            a.click();
-            
-            status.innerHTML = "<b style='color:#00ff00'>XUẤT FILE THÀNH CÔNG!</b>"; 
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {method:'POST', body:fd}).then(r=>r.json());
+                const a = document.createElement('a'); 
+                a.href = res.secure_url.replace('.webm', '.mp4'); 
+                a.download = "Wink_Pro_Final.mp4"; 
+                a.click();
+                status.innerHTML = "<b style='color:#00ff00'>XUẤT FILE THÀNH CÔNG!</b>"; 
+            } catch (err) {
+                status.innerText = "Lỗi khi xuất file!";
+            }
             pFill.style.width = '100%';
             document.getElementById('actionButtons').style.display='none'; 
             backBtn.style.display='block';
