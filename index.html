@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#ee4d2d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Wink 2.0 PRO + Sound</title>
+
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIldpbmsgMi4wIFBSTyIsCiAgInNob3J0X25hbWUiOiAiV2luayIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGMwYzE0IiwKICAidGhlbWVfY29sb3IiOiAiI2VlNGQyZCIKfQ==">
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg: #0c0c14; --surface: #14141f; --accent: #ee4d2d; --text: #e8e6f8; --border: #2a2840; }
@@ -18,10 +23,12 @@ body { background: var(--bg); color: var(--text); font-family: sans-serif; overf
 .card { background: var(--surface); border-radius: 20px; padding: 15px; border: 1px solid var(--border); }
 canvas { width: 100%; border-radius: 12px; background: #000; display: block; }
 
-.video-ctrl { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+.video-ctrl { margin: 15px 0; }
+.ctrl-row { display: flex; align-items: center; gap: 10px; }
 #playBtn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; min-width: 40px; }
 .seek-bar { flex-grow: 1; height: 8px; background: #333; border-radius: 4px; overflow: hidden; cursor: pointer; }
 .seek-fill { height: 100%; background: var(--accent); width: 0%; }
+.time-display { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-top: 6px; font-family: monospace; }
 
 .slider-group { margin-top: 18px; }
 .label-row { display: flex; justify-content: space-between; font-size: 13px; color: #bbb; margin-bottom: 8px; }
@@ -39,7 +46,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
 <body>
 
 <div class="header">
-    <img src="icon.jpg" class="logo" alt="Miku" onerror="this.style.border='1px solid #333'">
+    <img src="icon.jpg" class="logo" alt="Icon">
     <h2>Wink 2.0 <span style="color:var(--accent)">PRO</span></h2>
 </div>
 
@@ -47,16 +54,23 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
     <div id="upZone" class="card" style="text-align:center; padding: 60px 20px; border: 2px dashed #333;" onclick="document.getElementById('fIn').click()">
         <input type="file" id="fIn" accept="video/*" style="display:none">
         <div style="font-size: 50px;">🎬</div>
-        <p style="margin-top:10px; font-weight: bold;">CHỌN VIDEO CÓ ÂM THANH</p>
+        <p style="margin-top:10px; font-weight: bold;">CHỌN VIDEO CẦN LÀM NÉT</p>
     </div>
 
     <div id="appUI" style="display:none;">
         <div class="card">
             <canvas id="cv"></canvas>
             <div class="video-ctrl">
-                <button id="playBtn">⏸</button>
-                <div class="seek-bar" id="seekBar"><div class="seek-fill" id="seekFill"></div></div>
+                <div class="ctrl-row">
+                    <button id="playBtn">⏸</button>
+                    <div class="seek-bar" id="seekBar"><div class="seek-fill" id="seekFill"></div></div>
+                </div>
+                <div class="time-display">
+                    <span id="curTime">00:00</span>
+                    <span id="durTime">00:00</span>
+                </div>
             </div>
+            
             <div class="slider-group"><div class="label-row"><span>ĐỘ NÉT</span> <b id="v1" style="color:var(--accent)">1.5</b></div><input type="range" id="s1" min="0" max="5" step="0.1" value="1.5"></div>
             <div class="slider-group"><div class="label-row"><span>KHỬ NHIỄU</span> <b id="v2" style="color:var(--accent)">0.3</b></div><input type="range" id="s2" min="0" max="1" step="0.05" value="0.3"></div>
             <div class="slider-group"><div class="label-row"><span>TƯƠNG PHẢN</span> <b id="v3" style="color:var(--accent)">1.0</b></div><input type="range" id="s3" min="0.5" max="2.0" step="0.1" value="1.0"></div>
@@ -75,13 +89,30 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
 <video id="vid" playsinline style="display:none"></video>
 
 <script>
+// Cấu hình Cloudinary
 const CLOUD_NAME = "dmd2j39iz", UPLOAD_PRESET = "wink_preset"; 
+
+// Service Worker giả lập để Note 9 nhận diện PWA
+if ('serviceWorker' in navigator) {
+    const sw = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
+    const blob = new Blob([sw], {type: 'text/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
+}
+
 const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
 const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
 const startBtn = document.getElementById('startBtn'), status = document.getElementById('status'), pFill = document.getElementById('pFill'), pBar = document.getElementById('pBar');
 const seekBar = document.getElementById('seekBar'), seekFill = document.getElementById('seekFill'), backBtn = document.getElementById('backBtn'), playBtn = document.getElementById('playBtn');
+const curTimeText = document.getElementById('curTime'), durTimeText = document.getElementById('durTime');
 
 let gl, program, tex;
+
+// Định dạng thời gian 00:00
+function formatTime(t) {
+    const m = Math.floor(t / 60).toString().padStart(2, '0');
+    const s = Math.floor(t % 60).toString().padStart(2, '0');
+    return m + ":" + s;
+}
 
 fIn.onchange = e => {
     const file = e.target.files[0];
@@ -90,6 +121,7 @@ fIn.onchange = e => {
     vid.onloadeddata = () => {
         document.getElementById('upZone').style.display = 'none';
         document.getElementById('appUI').style.display = 'block';
+        durTimeText.innerText = formatTime(vid.duration);
         if(!gl) initGL();
         vid.play(); playBtn.innerText = "⏸";
     };
@@ -100,7 +132,11 @@ playBtn.onclick = () => {
     else { vid.pause(); playBtn.innerText = "▶"; }
 };
 
-vid.ontimeupdate = () => seekFill.style.width = (vid.currentTime / vid.duration * 100) + '%';
+vid.ontimeupdate = () => {
+    seekFill.style.width = (vid.currentTime / vid.duration * 100) + '%';
+    curTimeText.innerText = formatTime(vid.currentTime);
+};
+
 seekBar.onclick = e => vid.currentTime = ((e.clientX - seekBar.getBoundingClientRect().left) / seekBar.offsetWidth) * vid.duration;
 
 s1.oninput = () => document.getElementById('v1').innerText = s1.value;
@@ -121,6 +157,7 @@ function initGL() {
     tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, 10242, 33071); gl.texParameteri(gl.TEXTURE_2D, 10243, 33071);
     gl.texParameteri(gl.TEXTURE_2D, 10241, 9729); gl.texParameteri(gl.TEXTURE_2D, 10240, 9729);
+    
     requestAnimationFrame(function d(){
         if(vid.readyState >= 2){
             cv.width = vid.videoWidth; cv.height = vid.videoHeight;
@@ -138,33 +175,50 @@ function initGL() {
 
 startBtn.onclick = async () => {
     startBtn.disabled = true; pBar.style.display = 'block';
-    // FIX: Lấy cả hình ảnh từ Canvas và âm thanh từ Video
-    const stream = cv.captureStream(30);
-    if(vid.captureStream) {
-        const audioStream = vid.captureStream();
-        audioStream.getAudioTracks().forEach(track => stream.addTrack(track));
-    } else if(vid.mozCaptureStream) {
-        const audioStream = vid.mozCaptureStream();
-        audioStream.getAudioTracks().forEach(track => stream.addTrack(track));
-    }
     
-    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 12000000 });
-    const chunks = []; rec.ondataavailable = e => chunks.push(e.data);
-    vid.currentTime = 0; vid.play(); rec.start();
+    // Thu hình từ Canvas và tiếng trực tiếp từ thẻ Video
+    const stream = cv.captureStream(30);
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaElementSource(vid);
+    const dest = audioCtx.createMediaStreamDestination();
+    source.connect(dest);
+    source.connect(audioCtx.destination);
+    
+    dest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
+    
+    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12000000 });
+    const chunks = []; 
+    rec.ondataavailable = e => chunks.push(e.data);
+    
+    vid.currentTime = 0; 
+    vid.muted = false; // Mở tiếng để thu
+    vid.play(); 
+    rec.start();
+
     const inv = setInterval(() => {
         let p = (vid.currentTime / vid.duration) * 100;
         pFill.style.width = (p * 0.5) + '%';
-        status.innerText = `Đang render video & tiếng: ${Math.round(p)}%`;
+        status.innerText = `Đang xử lý video & tiếng: ${Math.round(p)}%`;
     }, 100);
+
     vid.onended = () => {
         clearInterval(inv); rec.stop();
         rec.onstop = async () => {
-            status.innerText = "Đang chuyển MP4...";
-            const fd = new FormData(); fd.append('file', new Blob(chunks, {type:'video/webm'})); fd.append('upload_preset', UPLOAD_PRESET);
+            status.innerText = "Đang gộp file MP4...";
+            const fd = new FormData(); 
+            fd.append('file', new Blob(chunks, {type:'video/webm'})); 
+            fd.append('upload_preset', UPLOAD_PRESET);
+            
             const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {method:'POST', body:fd}).then(r=>r.json());
-            const a = document.createElement('a'); a.href = res.secure_url.replace('.webm', '.mp4'); a.download = "Wink_Pro_Full.mp4"; a.click();
-            status.innerHTML = "<b style='color:#00ff00'>XONG! CÓ ĐỦ TIẾNG</b>"; pFill.style.width = '100%';
-            document.getElementById('actionButtons').style.display='none'; backBtn.style.display='block';
+            const a = document.createElement('a'); 
+            a.href = res.secure_url.replace('.webm', '.mp4'); 
+            a.download = "Wink_Pro_Final.mp4"; 
+            a.click();
+            
+            status.innerHTML = "<b style='color:#00ff00'>XUẤT FILE THÀNH CÔNG!</b>"; 
+            pFill.style.width = '100%';
+            document.getElementById('actionButtons').style.display='none'; 
+            backBtn.style.display='block';
         };
     };
 };
