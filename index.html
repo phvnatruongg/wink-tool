@@ -3,199 +3,555 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0c0c14">
-<title>Wink 2.0 Pro Max</title>
-
-<!-- PWA Metadata -->
-<link rel="icon" type="image/jpeg" href="icon.jpg">
-<link rel="apple-touch-icon" href="icon.jpg">
-<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Wink%202.0%22,%22short_name%22:%22Wink%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c14%22,%22theme_color%22:%22%237c6af0%22,%22icons%22:[{%22src%22:%22icon.jpg%22,%22sizes%22:%22192x192%22,%22type%22:%22image/jpeg%22}]}">
-
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-
+<title>Làm Nét Video → MP4</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-:root {
-  --bg: #0c0c14; --surface: #14141f; --surface2: #1c1c2e;
-  --accent: #7c6af0; --accent2: #a695ff; --text: #e8e6f8;
-  --muted: #8884a8; --border: #2a2840;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c14;--surf:#14141f;--surf2:#1c1c2e;
+  --accent:#7c6af0;--accent2:#a695ff;
+  --text:#e8e6f8;--muted:#8884a8;--border:#2a2840;
+  --green:#4ade80;--red:#f87171;--yellow:#fbbf24;
 }
-body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;overflow-x:hidden}
 
-.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
-.logo-miku { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--accent); object-fit: cover; }
+.header{background:var(--surf);border-bottom:1px solid var(--border);padding:.9rem 1.25rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20}
+.logo{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2}
+.header h1{font-size:16px;font-weight:600;letter-spacing:-.3px}
+.pill{margin-left:auto;font-size:11px;color:var(--muted);background:var(--surf2);padding:3px 9px;border-radius:20px;border:1px solid var(--border);white-space:nowrap}
 
-.main-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; max-width: 500px; margin: 0 auto; }
-.upload-card { background: var(--surface); border: 2px dashed var(--border); border-radius: 24px; padding: 60px 20px; text-align: center; cursor: pointer; }
-.app-layout { display: none; flex-direction: column; gap: 16px; }
-.app-layout.active { display: flex; }
+.body{padding:1rem;display:flex;flex-direction:column;gap:.875rem}
 
-.video-box { background: #000; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-canvas { width: 100%; height: auto; display: block; max-height: 60vh; }
+/* Upload */
+.upload-zone{border:2px dashed var(--border);border-radius:14px;padding:2.5rem 1rem;text-align:center;cursor:pointer;background:var(--surf);position:relative;transition:border-color .2s,background .2s}
+.upload-zone.drag{border-color:var(--accent);background:#14142a}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.up-icon{width:50px;height:50px;background:var(--surf2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.up-icon svg{width:24px;height:24px;stroke:var(--accent2);fill:none;stroke-width:1.8}
+.upload-zone p{font-size:15px;font-weight:500;margin-bottom:4px}
+.upload-zone small{font-size:12px;color:var(--muted)}
 
-.controls-card { background: var(--surface); border-radius: 24px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 18px; }
-.label-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-.val-num { color: var(--accent2); font-weight: bold; }
+/* Loading bar ffmpeg */
+.ffmpeg-load{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:none;flex-direction:column;gap:8px}
+.ffmpeg-load.show{display:flex}
+.ffload-text{font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
+.track{height:4px;background:var(--surf2);border-radius:4px;overflow:hidden}
+.fill{height:100%;border-radius:4px;background:var(--accent);width:0%;transition:width .3s}
 
-input[type=range] { -webkit-appearance: none; background: transparent; width: 100%; cursor: pointer; }
-input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--accent2); margin-top: -6px; }
+/* Preview */
+.preview-box{display:none;flex-direction:column;gap:.875rem}
+.preview-box.active{display:flex}
 
-.btn { padding: 16px; border-radius: 16px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
-.btn-primary { background: var(--accent); color: white; }
-.btn-secondary { background: var(--surface2); color: var(--accent2); border: 1px solid var(--border); display: none; margin-top: 10px; }
+.info-row{display:flex;gap:8px}
+.chip{flex:1;background:var(--surf2);border-radius:10px;padding:9px 12px;border:1px solid var(--border)}
+.chip .lbl{font-size:11px;color:var(--muted);margin-bottom:2px}
+.chip .val{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.prog-container { display: none; background: var(--surface2); padding: 15px; border-radius: 16px; margin-top: 10px; }
-.bar-outer { height: 6px; background: #000; border-radius: 3px; margin-top: 8px; overflow: hidden; }
-.bar-inner { height: 100%; background: var(--accent); width: 0%; }
-#status-txt { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+.cvs-wrap{background:#000;border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;min-height:180px}
+.cvs-wrap canvas{width:100%;height:100%;object-fit:contain;display:block;max-height:260px}
+video{display:none}
+.badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.72);color:var(--accent2);font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;letter-spacing:.5px}
+.preview-note{font-size:11px;color:var(--muted);text-align:center;margin-top:-4px}
+
+/* Controls */
+.controls{background:var(--surf);border-radius:14px;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.9rem;border:1px solid var(--border)}
+.ctrl-row{display:flex;flex-direction:column;gap:7px}
+.ctrl-label{display:flex;justify-content:space-between;align-items:center}
+.ctrl-label strong{font-size:14px;font-weight:500}
+.ctrl-label .v{font-size:13px;color:var(--accent2);font-weight:600;min-width:36px;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--surf2);border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--accent);border-radius:50%;cursor:pointer;border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
+.divider{height:1px;background:var(--border)}
+
+/* Video controls */
+.vc{display:flex;gap:8px;align-items:center}
+.btn-icon{width:38px;height:38px;background:var(--surf2);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.btn-icon:active{transform:scale(.93)}
+.btn-icon svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+.time-bar{flex:1;height:38px;display:flex;align-items:center;cursor:pointer}
+.time-track{width:100%;height:4px;background:var(--surf2);border-radius:4px;overflow:hidden}
+.time-fill{height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width .1s linear}
+
+/* Export progress */
+.exp-box{background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;display:none;flex-direction:column;gap:10px}
+.exp-box.active{display:flex}
+.exp-top{display:flex;justify-content:space-between;align-items:center}
+.exp-top span{font-size:13px;color:var(--muted)}
+.exp-top strong{font-size:13px;color:var(--accent2);font-weight:600}
+.exp-step{font-size:12px;color:var(--muted)}
+
+/* Buttons */
+.actions{display:flex;flex-direction:column;gap:.75rem}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.2px;transition:opacity .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.btn-export{background:var(--accent);color:#fff}
+.btn-reset{background:var(--surf);color:var(--muted);border:1px solid var(--border);font-size:14px;padding:11px}
+
+/* Codec selector */
+.codec-row{display:flex;gap:8px}
+.codec-opt{flex:1;padding:9px 8px;border:1px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;font-size:12px;font-weight:500;color:var(--muted);background:var(--surf2);transition:border-color .15s,color .15s;-webkit-tap-highlight-color:transparent}
+.codec-opt.active{border-color:var(--accent);color:var(--accent2);background:#14142a}
+.codec-opt .clabel{font-size:11px;font-weight:400;color:var(--muted);margin-top:2px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:100;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{color:var(--green);border-color:#1a3a2a}
+.toast.err{color:var(--red);border-color:#3a1a1a}
+.toast.warn{color:var(--yellow);border-color:#3a2f1a}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <img src="icon.jpg" class="logo-miku" onerror="this.style.display='none'">
-  <h1>Wink 2.0 Pro</h1>
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+  </div>
+  <h1>Làm Nét Video → MP4</h1>
+  <span class="pill">ffmpeg.wasm · H.264</span>
 </div>
 
-<div class="main-container">
-  <div class="upload-card" id="upZone" onclick="document.getElementById('fIn').click()">
-    <input type="file" id="fIn" accept="video/*" style="display:none">
-    <div style="font-size: 40px; margin-bottom: 10px;">📂</div>
-    <p style="font-weight: 600;">Chọn video để xử lý</p>
-  </div>
+<div class="body">
 
-  <div class="app-layout" id="appUI">
-    <div class="video-box"><canvas id="cv"></canvas></div>
-
-    <div class="controls-card">
-      <div>
-        <div class="label-row"><span>ĐỘ NÉT</span> <span class="val-num" id="v1">1.2</span></div>
-        <input type="range" id="s1" min="0" max="5" step="0.1" value="1.2">
-      </div>
-      <div>
-        <div class="label-row"><span>TƯƠNG PHẢN</span> <span class="val-num" id="v2">0.5</span></div>
-        <input type="range" id="s2" min="0" max="2" step="0.05" value="0.5">
-      </div>
-      <div>
-        <div class="label-row"><span>KHỬ NHIỄU</span> <span class="val-num" id="v3">0.2</span></div>
-        <input type="range" id="s3" min="0" max="1" step="0.05" value="0.2">
-      </div>
-
-      <div class="prog-container" id="pBox">
-        <div class="bar-outer"><div class="bar-inner" id="pFill"></div></div>
-        <div id="status-txt">Đang xử lý...</div>
-      </div>
-
-      <button class="btn btn-primary" id="exWebm">🚀 XUẤT VIDEO (SIÊU NHANH)</button>
-      <button class="btn btn-secondary" id="exMp4">🎁 CHUYỂN SANG MP4 (NẾU CẦN)</button>
-      <button class="btn" style="background:transparent; color: var(--muted); font-size:12px;" onclick="location.reload()">ĐỔI VIDEO KHÁC</button>
+  <div class="ffmpeg-load" id="ffmpegLoad">
+    <div class="ffload-text">
+      <span id="loadLabel">Đang tải FFmpeg engine...</span>
+      <span id="loadPct">0%</span>
     </div>
+    <div class="track"><div class="fill" id="loadFill"></div></div>
+    <small style="font-size:11px;color:var(--muted)">Chỉ tải 1 lần, lần sau sẽ dùng cache (~25MB)</small>
   </div>
+
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept="video/*">
+    <div class="up-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    </div>
+    <p>Chọn video từ thiết bị</p>
+    <small>MP4 · MOV · AVI · WebM · MKV...</small>
+  </div>
+
+  <div class="preview-box" id="previewBox">
+
+    <div class="info-row">
+      <div class="chip"><div class="lbl">Tên file</div><div class="val" id="infoName">—</div></div>
+      <div class="chip"><div class="lbl">Dung lượng</div><div class="val" id="infoSize">—</div></div>
+      <div class="chip"><div class="lbl">Thời lượng</div><div class="val" id="infoDur">—</div></div>
+    </div>
+
+    <div class="cvs-wrap">
+      <canvas id="glCanvas"></canvas>
+      <div class="badge" id="badge">Gốc</div>
+    </div>
+    <div class="preview-note">Preview thời gian thực — xuất sẽ dùng FFmpeg encode H.264 thật</div>
+
+    <video id="srcVideo" playsinline></video>
+
+    <div class="controls">
+
+      <div class="ctrl-row">
+        <div class="ctrl-label"><strong>Độ nét</strong><span class="v" id="vSharp">0.0</span></div>
+        <input type="range" id="sSharp" min="0" max="3" step="0.1" value="0">
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label"><strong>Kích thước kernel</strong><span class="v" id="vKernel">5×5</span></div>
+        <input type="range" id="sKernel" min="0" max="2" step="1" value="1">
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label"><strong>Giảm nhiễu</strong><span class="v" id="vNoise">0</span></div>
+        <input type="range" id="sNoise" min="0" max="4" step="0.5" value="0">
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label" style="margin-bottom:4px"><strong>Chất lượng xuất (CRF)</strong><span class="v" id="vCrf">23</span></div>
+        <input type="range" id="sCrf" min="15" max="35" step="1" value="23">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px"><span>Cao nhất</span><span>Nhỏ nhất</span></div>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label" style="margin-bottom:6px"><strong>Tốc độ encode</strong></div>
+        <div class="codec-row" id="presetRow">
+          <div class="codec-opt active" data-val="ultrafast">Nhanh<div class="clabel">~1-3 phút</div></div>
+          <div class="codec-opt" data-val="medium">Cân bằng<div class="clabel">~3-8 phút</div></div>
+          <div class="codec-opt" data-val="slow">Chất lượng<div class="clabel">~8-20 phút</div></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="vc">
+        <button class="btn-icon" id="playBtn">
+          <svg viewBox="0 0 24 24" id="playIcon"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <div class="time-bar" id="timeBar">
+          <div class="time-track"><div class="time-fill" id="timeFill"></div></div>
+        </div>
+        <button class="btn-icon" id="muteBtn">
+          <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <div class="exp-box" id="expBox">
+      <div class="exp-top"><span id="expLabel">Đang chuẩn bị...</span><strong id="expPct">0%</strong></div>
+      <div class="track"><div class="fill" id="expFill"></div></div>
+      <div class="exp-step" id="expStep">Khởi tạo FFmpeg</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-export" id="exportBtn">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Xuất MP4 (H.264 thật)
+      </button>
+      <button class="btn btn-reset" id="resetBtn">↩ Chọn video khác</button>
+    </div>
+
+  </div>
+
 </div>
 
-<video id="vid" playsinline style="display:none"></video>
+<div class="toast" id="toast"></div>
 
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
 const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log: false });
 
-async function initFFmpeg() {
-  try { await ffmpeg.load(); } catch (e) { console.log("MP4 Mode disabled"); }
+// ── State ──
+let gl, program, texture, rafId;
+let uRes, uSharp, uEdge, uNoise2;
+let currentFile = null;
+let ffmpegReady = false;
+let exporting = false;
+let selectedPreset = 'ultrafast';
+const kernelSizes = [3, 5, 7];
+
+const ffmpeg = createFFmpeg({
+  corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+  log: false,
+  progress: ({ ratio }) => {
+    const pct = Math.min(100, Math.round(ratio * 100));
+    expFill.style.width = pct + '%';
+    expPct.textContent = pct + '%';
+    if (pct > 0 && pct < 100) expLabel.textContent = 'Đang encode H.264...';
+  }
+});
+
+// ── Shaders ──
+const VS = `
+attribute vec2 a_p; attribute vec2 a_u; varying vec2 v_u;
+void main(){v_u=a_u;gl_Position=vec4(a_p,0,1);}`;
+
+const FS = `
+precision mediump float;
+uniform sampler2D u_t; uniform vec2 u_r;
+uniform float u_sh; uniform float u_ed; uniform float u_no;
+varying vec2 v_u;
+vec3 blur(vec2 uv,vec2 px){
+  vec3 s=vec3(0);
+  s+=texture2D(u_t,uv+vec2(-px.x,-px.y)).rgb*.0625;
+  s+=texture2D(u_t,uv+vec2(0,-px.y)).rgb*.125;
+  s+=texture2D(u_t,uv+vec2(px.x,-px.y)).rgb*.0625;
+  s+=texture2D(u_t,uv+vec2(-px.x,0)).rgb*.125;
+  s+=texture2D(u_t,uv).rgb*.25;
+  s+=texture2D(u_t,uv+vec2(px.x,0)).rgb*.125;
+  s+=texture2D(u_t,uv+vec2(-px.x,px.y)).rgb*.0625;
+  s+=texture2D(u_t,uv+vec2(0,px.y)).rgb*.125;
+  s+=texture2D(u_t,uv+vec2(px.x,px.y)).rgb*.0625;
+  return s;
 }
-initFFmpeg();
+void main(){
+  vec2 px=1.0/u_r;
+  vec4 orig=texture2D(u_t,v_u);
+  vec3 c=orig.rgb;
+  if(u_no>0.0)c=mix(c,blur(v_u,px),u_no*.45);
+  if(u_sh>0.0){vec3 b=blur(v_u,px);c=c+u_sh*(c-b);}
+  gl_FragColor=vec4(clamp(c,0.0,1.0),orig.a);
+}`;
 
-const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
-const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
-const exWebm = document.getElementById('exWebm'), exMp4 = document.getElementById('exMp4');
-const pBox = document.getElementById('pBox'), pFill = document.getElementById('pFill'), statusTxt = document.getElementById('status-txt');
+// ── DOM refs ──
+const video      = document.getElementById('srcVideo');
+const canvas     = document.getElementById('glCanvas');
+const fileInput  = document.getElementById('fileInput');
+const uploadZone = document.getElementById('uploadZone');
+const previewBox = document.getElementById('previewBox');
+const ffmpegLoad = document.getElementById('ffmpegLoad');
+const loadLabel  = document.getElementById('loadLabel');
+const loadPct    = document.getElementById('loadPct');
+const loadFill   = document.getElementById('loadFill');
+const badge      = document.getElementById('badge');
+const playBtn    = document.getElementById('playBtn');
+const playIcon   = document.getElementById('playIcon');
+const muteBtn    = document.getElementById('muteBtn');
+const timeFill   = document.getElementById('timeFill');
+const timeBar    = document.getElementById('timeBar');
+const expBox     = document.getElementById('expBox');
+const expLabel   = document.getElementById('expLabel');
+const expPct     = document.getElementById('expPct');
+const expFill    = document.getElementById('expFill');
+const expStep    = document.getElementById('expStep');
+const exportBtn  = document.getElementById('exportBtn');
+const resetBtn   = document.getElementById('resetBtn');
+const infoName   = document.getElementById('infoName');
+const infoSize   = document.getElementById('infoSize');
+const infoDur    = document.getElementById('infoDur');
+const sSharp     = document.getElementById('sSharp');
+const sKernel    = document.getElementById('sKernel');
+const sNoise     = document.getElementById('sNoise');
+const sCrf       = document.getElementById('sCrf');
+const vSharp     = document.getElementById('vSharp');
+const vKernel    = document.getElementById('vKernel');
+const vNoise     = document.getElementById('vNoise');
+const vCrf       = document.getElementById('vCrf');
 
-let webmBlob = null;
-
-fIn.onchange = e => {
-  const file = e.target.files[0];
-  if(!file) return;
-  vid.src = URL.createObjectURL(file);
-  vid.onloadedmetadata = () => {
-    document.getElementById('upZone').style.display = 'none';
-    document.getElementById('appUI').classList.add('active');
-    initGL(); render(); vid.play();
-  };
-};
-
-[s1, s2, s3].forEach((s, i) => s.oninput = () => document.getElementById('v' + (i+1)).innerText = parseFloat(s.value).toFixed(1));
-
-exWebm.onclick = async () => {
-  exWebm.disabled = true; pBox.style.display = 'block';
-  statusTxt.innerText = "Đang trích xuất video nét...";
-  
-  const stream = cv.captureStream(30);
-  const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
-  const chunks = [];
-  
-  rec.ondataavailable = e => chunks.push(e.data);
-  vid.currentTime = 0; vid.play(); rec.start();
-
-  const inv = setInterval(() => {
-    const p = (vid.currentTime / vid.duration * 100).toFixed(0);
-    pFill.style.width = p + '%';
-  }, 200);
-
-  vid.onended = () => {
-    clearInterval(inv); rec.stop();
-    rec.onstop = () => {
-      webmBlob = new Blob(chunks, { type: 'video/webm' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(webmBlob);
-      a.download = "Wink_Net.webm"; a.click();
-      statusTxt.innerText = "Đã xong WebM! Bạn có thể chuyển MP4 bên dưới.";
-      exWebm.disabled = false; exMp4.style.display = 'block';
-    };
-  };
-};
-
-exMp4.onclick = async () => {
-  if (!ffmpeg.isLoaded()) { alert("Trình duyệt chặn bộ chuyển MP4. Hãy dùng file WebM vừa tải nhé!"); return; }
-  exMp4.disabled = true; statusTxt.innerText = "Đang chuyển đổi sang MP4...";
-  pFill.style.width = '50%';
-  ffmpeg.FS('writeFile', 'i.webm', await fetchFile(webmBlob));
-  await ffmpeg.run('-i', 'i.webm', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', 'o.mp4');
-  const data = ffmpeg.FS('readFile', 'o.mp4');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-  a.download = "Wink_Final.mp4"; a.click();
-  statusTxt.innerText = "Hoàn tất MP4!"; exMp4.disabled = false;
-};
-
-let gl, program;
+// ── WebGL init ──
 function initGL() {
-  gl = cv.getContext('webgl');
-  const vs = gl.createShader(gl.VERTEX_SHADER), fs = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(vs, `attribute vec2 p,u;varying vec2 v;void main(){v=u;gl_Position=vec4(p,0,1);}`);
-  gl.compileShader(vs);
-  gl.shaderSource(fs, `precision mediump float;uniform sampler2D t;uniform vec2 r;uniform float s,e,n;varying vec2 v;void main(){vec2 px=1.0/r;vec4 o=texture2D(t,v);vec3 bl=texture2D(t,v-px).rgb*0.5+texture2D(t,v+px).rgb*0.5;vec3 c=o.rgb;if(n>0.0)c=mix(c,bl,n*0.5);gl_FragColor=vec4(c+s*(c-bl),o.a);}`);
-  gl.compileShader(fs);
-  program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program); gl.useProgram(program);
-  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,0,1,1,-1,1,1,-1,1,0,0,1,1,1,0]), gl.STATIC_DRAW);
-  const p = gl.getAttribLocation(program,'p'), u = gl.getAttribLocation(program,'u');
-  gl.vertexAttribPointer(p,2,gl.FLOAT,0,16,0); gl.vertexAttribPointer(u,2,gl.FLOAT,0,16,8);
-  gl.enableVertexAttribArray(p); gl.enableVertexAttribArray(u);
-  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-  gl.texParameteri(gl.TEXTURE_2D, 10242, 33071); gl.texParameteri(gl.TEXTURE_2D, 10243, 33071);
-  gl.texParameteri(gl.TEXTURE_2D, 10241, 9729); gl.texParameteri(gl.TEXTURE_2D, 10240, 9729);
+  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return false;
+  const mk = t => { const s=gl.createShader(t);gl.shaderSource(s,t===gl.VERTEX_SHADER?VS:FS);gl.compileShader(s);return s; };
+  program = gl.createProgram();
+  gl.attachShader(program, mk(gl.VERTEX_SHADER));
+  gl.attachShader(program, mk(gl.FRAGMENT_SHADER));
+  gl.linkProgram(program);
+  gl.useProgram(program);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,0,1, 1,-1,1,1, -1,1,0,0, 1,1,1,0]), gl.STATIC_DRAW);
+  ['a_p','a_u'].forEach((n,i)=>{ const l=gl.getAttribLocation(program,n);gl.vertexAttribPointer(l,2,gl.FLOAT,false,16,i*8);gl.enableVertexAttribArray(l); });
+  uRes=gl.getUniformLocation(program,'u_r');
+  uSharp=gl.getUniformLocation(program,'u_sh');
+  uNoise2=gl.getUniformLocation(program,'u_no');
+  texture=gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D,texture);
+  [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,p,gl.CLAMP_TO_EDGE));
+  [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,p,gl.LINEAR));
+  return true;
 }
-function render() {
-  if(vid.readyState < 2) { requestAnimationFrame(render); return; }
-  cv.width = vid.videoWidth; cv.height = vid.videoHeight;
-  gl.viewport(0,0,cv.width,cv.height);
-  gl.texImage2D(gl.TEXTURE_2D,0,6408,6408,5121,vid);
-  gl.uniform2f(gl.getUniformLocation(program,'r'), cv.width, cv.height);
-  gl.uniform1f(gl.getUniformLocation(program,'s'), s1.value);
-  gl.uniform1f(gl.getUniformLocation(program,'n'), s3.value);
-  gl.drawArrays(5,0,4);
-  requestAnimationFrame(render);
+
+function renderFrame() {
+  if (video.readyState >= 2 && gl) {
+    const w = video.videoWidth||640, h = video.videoHeight||360;
+    if (canvas.width!==w||canvas.height!==h){ canvas.width=w; canvas.height=h; }
+    gl.viewport(0,0,w,h);
+    gl.bindTexture(gl.TEXTURE_2D,texture);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,video);
+    gl.uniform2f(uRes,w,h);
+    gl.uniform1f(uSharp,parseFloat(sSharp.value));
+    gl.uniform1f(uNoise2,parseFloat(sNoise.value)/4);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  if (!video.paused && video.duration)
+    timeFill.style.width = (video.currentTime/video.duration*100)+'%';
+  rafId = requestAnimationFrame(renderFrame);
 }
+
+// ── Load ffmpeg (background) ──
+async function loadFFmpeg() {
+  ffmpegLoad.classList.add('show');
+  let fake = 0;
+  const fakeInt = setInterval(()=>{ fake=Math.min(fake+2,90); loadFill.style.width=fake+'%'; loadPct.textContent=fake+'%'; },300);
+  try {
+    await ffmpeg.load();
+    clearInterval(fakeInt);
+    loadFill.style.width='100%'; loadPct.textContent='100%';
+    loadLabel.textContent='FFmpeg sẵn sàng ✓';
+    setTimeout(()=>ffmpegLoad.classList.remove('show'),1500);
+    ffmpegReady = true;
+  } catch(e) {
+    clearInterval(fakeInt);
+    loadLabel.textContent='Lỗi tải FFmpeg — kiểm tra kết nối mạng';
+    showToast('Không tải được FFmpeg engine','err');
+  }
+}
+
+// ── Load video ──
+function loadVideo(file) {
+  currentFile = file;
+  const url = URL.createObjectURL(file);
+  video.src = url;
+  video.load();
+  video.onloadedmetadata = () => {
+    uploadZone.style.display = 'none';
+    previewBox.classList.add('active');
+    infoName.textContent = file.name.length>18 ? file.name.substring(0,16)+'…' : file.name;
+    infoSize.textContent = (file.size/1024/1024).toFixed(1)+' MB';
+    const m = Math.floor(video.duration/60), s = Math.floor(video.duration%60);
+    infoDur.textContent = m+'m '+String(s).padStart(2,'0')+'s';
+    if (!gl) initGL();
+    if (rafId) cancelAnimationFrame(rafId);
+    renderFrame();
+    video.play().catch(()=>{});
+    updatePlayIcon();
+  };
+}
+
+// ── Sliders ──
+sSharp.addEventListener('input',()=>{ vSharp.textContent=parseFloat(sSharp.value).toFixed(1); updateBadge(); });
+sKernel.addEventListener('input',()=>{ const k=kernelSizes[parseInt(sKernel.value)]; vKernel.textContent=k+'×'+k; updateBadge(); });
+sNoise.addEventListener('input',()=>{ vNoise.textContent=parseFloat(sNoise.value).toFixed(1); updateBadge(); });
+sCrf.addEventListener('input',()=>{ vCrf.textContent=sCrf.value; });
+
+function updateBadge() {
+  badge.textContent = (parseFloat(sSharp.value)===0 && parseFloat(sNoise.value)===0) ? 'Gốc' : 'Preview';
+}
+
+// ── Preset selector ──
+document.getElementById('presetRow').querySelectorAll('.codec-opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.codec-opt').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    selectedPreset = el.dataset.val;
+  });
+});
+
+// ── Play controls ──
+playBtn.addEventListener('click',()=>{ video.paused?video.play():video.pause(); updatePlayIcon(); });
+video.addEventListener('ended',()=>{ video.currentTime=0; updatePlayIcon(); });
+function updatePlayIcon(){
+  playIcon.innerHTML = video.paused
+    ? '<polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>'
+    : '<rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/>';
+}
+
+let muted=false;
+muteBtn.addEventListener('click',()=>{ muted=!muted; video.muted=muted; muteBtn.style.opacity=muted?'.4':'1'; });
+
+timeBar.addEventListener('click',e=>{
+  const r=timeBar.getBoundingClientRect();
+  video.currentTime = ((e.clientX-r.left)/r.width)*video.duration;
+});
+
+// ── EXPORT ──
+exportBtn.addEventListener('click', async () => {
+  if (exporting || !currentFile) return;
+
+  if (!ffmpegReady) {
+    showToast('FFmpeg chưa sẵn sàng, đợi chút...','warn');
+    return;
+  }
+
+  const sharpAmount = parseFloat(sSharp.value);
+  const noiseAmount = parseFloat(sNoise.value);
+  const kernelSize  = kernelSizes[parseInt(sKernel.value)];
+  const crf         = sCrf.value;
+
+  exporting = true;
+  exportBtn.disabled = true;
+  video.pause(); updatePlayIcon();
+  expBox.classList.add('active');
+  expPct.textContent = '0%';
+  expFill.style.width = '0%';
+  expLabel.textContent = 'Đang chuẩn bị...';
+
+  try {
+    // 1. Ghi file vào FS ảo
+    expStep.textContent = 'Đọc file gốc...';
+    const ext = currentFile.name.split('.').pop().toLowerCase() || 'mp4';
+    const inputName = 'input.' + ext;
+    ffmpeg.FS('writeFile', inputName, await fetchFile(currentFile));
+
+    // 2. Build filter chain
+    const filters = [];
+    if (noiseAmount > 0) {
+      const nd = (noiseAmount * 1.5).toFixed(1);
+      filters.push(`hqdn3d=${nd}:${nd}:${(noiseAmount*4).toFixed(0)}:${(noiseAmount*4).toFixed(0)}`);
+    }
+    if (sharpAmount > 0) {
+      filters.push(`unsharp=${kernelSize}:${kernelSize}:${sharpAmount.toFixed(2)}:${kernelSize}:${kernelSize}:${(sharpAmount*0.3).toFixed(2)}`);
+    }
+
+    const vfArg = filters.length > 0 ? filters.join(',') : 'null';
+
+    expStep.textContent = 'Encode H.264...';
+    expLabel.textContent = 'Đang encode (0%)...';
+
+    // 3. Run ffmpeg
+    await ffmpeg.run(
+      '-i', inputName,
+      '-vf', vfArg,
+      '-c:v', 'libx264',
+      '-crf', crf,
+      '-preset', selectedPreset,
+      '-movflags', '+faststart',
+      '-c:a', 'aac',
+      '-b:a', '192k',
+      'output.mp4'
+    );
+
+    expStep.textContent = 'Tạo file tải xuống...';
+
+    // 4. Đọc output
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    const blob = new Blob([data.buffer], { type: 'video/mp4' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const baseName = currentFile.name.replace(/\.[^.]+$/, '');
+    a.href = url;
+    a.download = baseName + '_lam-net.mp4';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Cleanup
+    ffmpeg.FS('unlink', inputName);
+    ffmpeg.FS('unlink', 'output.mp4');
+
+    expLabel.textContent = 'Hoàn tất!';
+    expFill.style.width = '100%';
+    expPct.textContent = '100%';
+    expStep.textContent = 'File MP4 (H.264) đã được tải xuống ✓';
+    showToast('✓ Xuất MP4 thành công!', 'ok');
+    setTimeout(()=>expBox.classList.remove('active'), 3000);
+
+  } catch (err) {
+    expLabel.textContent = 'Có lỗi xảy ra';
+    expStep.textContent = err.message || 'Lỗi không xác định';
+    showToast('Lỗi khi encode: ' + (err.message||'unknown'), 'err');
+  }
+
+  exporting = false;
+  exportBtn.disabled = false;
+  video.play().catch(()=>{});
+  updatePlayIcon();
+});
+
+// ── Reset ──
+resetBtn.addEventListener('click',()=>{
+  if (exporting) return;
+  video.pause(); video.src='';
+  if(rafId) cancelAnimationFrame(rafId);
+  uploadZone.style.display='';
+  previewBox.classList.remove('active');
+  expBox.classList.remove('active');
+  fileInput.value='';
+  currentFile=null;
+  sSharp.value=0; vSharp.textContent='0.0';
+  sKernel.value=1; vKernel.textContent='5×5';
+  sNoise.value=0; vNoise.textContent='0';
+  sCrf.value=23; vCrf.textContent='23';
+  updateBadge();
+});
+
+// ── Upload ──
+fileInput.addEventListener('change',e=>{ if(e.target.files[0]) loadVideo(e.target.files[0]); });
+uploadZone.addEventListener('dragover',e=>{ e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop',e=>{ e.preventDefault(); uploadZone.classList.remove('drag'); if(e.dataTransfer.files[0]) loadVideo(e.dataTransfer.files[0]); });
+
+// ── Toast ──
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+(type||'');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.className='toast '+(type||''),3500);
+}
+
+// ── Tải FFmpeg ngay khi mở app ──
+loadFFmpeg();
 </script>
 </body>
 </html>
