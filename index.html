@@ -3,241 +3,791 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Wink 2.0 PRO + Sound</title>
+
 <meta name="theme-color" content="#ee4d2d">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Wink 2.0 PRO</title>
 
-<link rel="manifest" href='data:application/manifest+json,{"name":"Wink 2.0 PRO","short_name":"Wink","start_url":".","display":"standalone","background_color":"#0c0c14","theme_color":"#ee4d2d","icons":[{"src":"icon.png","sizes":"192x192","type":"image/png"},{"src":"icon.png","sizes":"512x512","type":"image/png"}]}'>
+<link rel="manifest" href="manifest.json">
+
+<!-- ICON -->
+<link rel="icon" type="image/jpeg" href="icon.jpg">
+<link rel="shortcut icon" href="icon.jpg">
+<link rel="apple-touch-icon" href="icon.jpg">
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root { --bg: #0c0c14; --surface: #14141f; --accent: #ee4d2d; --text: #e8e6f8; --border: #2a2840; }
-body { background: var(--bg); color: var(--text); font-family: sans-serif; overflow-y: auto; min-height: 100vh; }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-/* Header lấy từ bản bạn yêu cầu */
-.header { background: var(--surface); padding: 12px 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-.logo { width: 35px; height: 35px; border-radius: 8px; border: 1px solid var(--accent); object-fit: cover; }
-.header h2 { font-size: 1.1rem; }
+:root{
+    --bg:#0c0c14;
+    --surface:#14141f;
+    --accent:#ee4d2d;
+    --text:#e8e6f8;
+    --border:#2a2840;
+}
 
-.main { padding: 15px; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px; }
-.card { background: var(--surface); border-radius: 20px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-canvas { width: 100%; border-radius: 12px; background: #000; display: block; }
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:sans-serif;
+    overflow-y:auto;
+    min-height:100vh;
+}
 
-.video-ctrl { margin: 15px 0; }
-.ctrl-row { display: flex; align-items: center; gap: 10px; }
-#playBtn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; min-width: 40px; outline: none; }
-.seek-bar { flex-grow: 1; height: 8px; background: #333; border-radius: 4px; overflow: hidden; cursor: pointer; }
-.seek-fill { height: 100%; background: var(--accent); width: 0%; }
-.time-display { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-top: 6px; font-family: monospace; }
+.header{
+    background:var(--surface);
+    padding:12px 15px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:100;
+}
 
-.slider-group { margin-top: 18px; }
-.label-row { display: flex; justify-content: space-between; font-size: 13px; color: #bbb; margin-bottom: 8px; }
-b { color: var(--accent); }
-input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; cursor: pointer; }
+.logo{
+    width:35px;
+    height:35px;
+    border-radius:8px;
+    border:1px solid var(--accent);
+    object-fit:cover;
+}
 
-.btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.2s; }
-.btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(238, 77, 45, 0.3); }
-.btn-outline { background: transparent; border: 1px solid #444; color: #aaa; }
-.btn:active { transform: scale(0.98); }
+.header h2{
+    font-size:1.1rem;
+}
 
-#status { font-size: 14px; color: #aaa; text-align: center; margin: 15px 0; min-height: 20px; }
-.prog-bar { height: 8px; background: #000; border-radius: 4px; display: none; overflow: hidden; }
-.prog-fill { height: 100%; background: var(--accent); width: 0%; transition: 0.1s; }
+.main{
+    padding:15px;
+    max-width:500px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding-bottom:40px;
+}
+
+.card{
+    background:var(--surface);
+    border-radius:20px;
+    padding:15px;
+    border:1px solid var(--border);
+}
+
+canvas{
+    width:100%;
+    border-radius:12px;
+    background:#000;
+    display:block;
+}
+
+.video-ctrl{
+    margin:15px 0;
+}
+
+.ctrl-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+#playBtn{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-size:24px;
+    cursor:pointer;
+    min-width:40px;
+}
+
+.seek-bar{
+    flex-grow:1;
+    height:8px;
+    background:#333;
+    border-radius:4px;
+    overflow:hidden;
+    cursor:pointer;
+}
+
+.seek-fill{
+    height:100%;
+    background:var(--accent);
+    width:0%;
+}
+
+.time-display{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:#888;
+    margin-top:6px;
+    font-family:monospace;
+}
+
+.slider-group{
+    margin-top:18px;
+}
+
+.label-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:#bbb;
+    margin-bottom:8px;
+}
+
+input[type=range]{
+    width:100%;
+    accent-color:var(--accent);
+    height:10px;
+}
+
+.btn{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:15px;
+    margin-top:10px;
+}
+
+.btn-primary{
+    background:var(--accent);
+    color:white;
+}
+
+.btn-outline{
+    background:transparent;
+    border:1px solid #444;
+    color:#aaa;
+}
+
+#status{
+    font-size:14px;
+    color:#aaa;
+    text-align:center;
+    margin:15px 0;
+}
+
+.prog-bar{
+    height:8px;
+    background:#000;
+    border-radius:4px;
+    display:none;
+    overflow:hidden;
+}
+
+.prog-fill{
+    height:100%;
+    background:var(--accent);
+    width:0%;
+    transition:0.1s;
+}
 </style>
 </head>
+
 <body>
 
 <div class="header">
-    <img src="icon.png" class="logo" alt="Icon" onerror="this.src='https://via.placeholder.com/35/ee4d2d/ffffff?text=W'">
+    <img src="icon.jpg" class="logo">
     <h2>Wink 2.0 <span style="color:var(--accent)">PRO</span></h2>
 </div>
 
 <div class="main">
-    <div id="upZone" class="card" style="text-align:center; padding: 60px 20px; border: 2px dashed #333;" onclick="document.getElementById('fIn').click()">
+
+    <div id="upZone"
+    class="card"
+    style="text-align:center;padding:60px 20px;border:2px dashed #333;"
+    onclick="document.getElementById('fIn').click()">
+
         <input type="file" id="fIn" accept="video/*" style="display:none">
-        <div style="font-size: 50px;">🎬</div>
-        <p style="margin-top:10px; font-weight: bold;">CHỌN VIDEO CẦN LÀM NÉT</p>
+
+        <div style="font-size:50px;">🎬</div>
+
+        <p style="margin-top:10px;font-weight:bold;">
+            CHỌN VIDEO CẦN LÀM NÉT
+        </p>
+
     </div>
 
     <div id="appUI" style="display:none;">
+
         <div class="card">
+
             <canvas id="cv"></canvas>
+
             <div class="video-ctrl">
+
                 <div class="ctrl-row">
+
                     <button id="playBtn">⏸</button>
-                    <div class="seek-bar" id="seekBar"><div class="seek-fill" id="seekFill"></div></div>
+
+                    <div class="seek-bar" id="seekBar">
+                        <div class="seek-fill" id="seekFill"></div>
+                    </div>
+
                 </div>
+
                 <div class="time-display">
                     <span id="curTime">00:00</span>
                     <span id="durTime">00:00</span>
                 </div>
-            </div>
-            
-            <div class="slider-group"><div class="label-row"><span>ĐỘ NÉT</span> <b id="v1">1.5</b></div><input type="range" id="s1" min="0" max="5" step="0.1" value="1.5"></div>
-            <div class="slider-group"><div class="label-row"><span>KHỬ NHIỄU</span> <b id="v2">0.3</b></div><input type="range" id="s2" min="0" max="1" step="0.05" value="0.3"></div>
-            <div class="slider-group"><div class="label-row"><span>TƯƠNG PHẢN</span> <b id="v3">1.0</b></div><input type="range" id="s3" min="0.5" max="2.0" step="0.1" value="1.0"></div>
 
-            <div id="actionButtons" style="margin-top: 15px;">
-                <button class="btn btn-primary" id="startBtn">🚀 XUẤT MP4 </button>
-                <button class="btn btn-outline" id="reSelect">📂 ĐỔI VIDEO</button>
             </div>
+
+            <div class="slider-group">
+                <div class="label-row">
+                    <span>ĐỘ NÉT</span>
+                    <b id="v1" style="color:var(--accent)">1.5</b>
+                </div>
+
+                <input type="range"
+                id="s1"
+                min="0"
+                max="5"
+                step="0.1"
+                value="1.5">
+            </div>
+
+            <div class="slider-group">
+                <div class="label-row">
+                    <span>KHỬ NHIỄU</span>
+                    <b id="v2" style="color:var(--accent)">0.3</b>
+                </div>
+
+                <input type="range"
+                id="s2"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.3">
+            </div>
+
+            <div class="slider-group">
+                <div class="label-row">
+                    <span>TƯƠNG PHẢN</span>
+                    <b id="v3" style="color:var(--accent)">1.0</b>
+                </div>
+
+                <input type="range"
+                id="s3"
+                min="0.5"
+                max="2.0"
+                step="0.1"
+                value="1.0">
+            </div>
+
+            <div id="actionButtons" style="margin-top:15px;">
+
+                <button class="btn btn-primary" id="startBtn">
+                    🚀 XUẤT MP4
+                </button>
+
+                <button class="btn btn-outline" id="reSelect">
+                    📂 ĐỔI VIDEO
+                </button>
+
+            </div>
+
             <div id="status">Sẵn sàng...</div>
-            <div class="prog-bar" id="pBar"><div class="prog-fill" id="pFill"></div></div>
-            <button class="btn btn-primary" id="backBtn" style="display:none; background: #2ecc71;">🔄 LÀM TIẾP VIDEO KHÁC</button>
+
+            <div class="prog-bar" id="pBar">
+                <div class="prog-fill" id="pFill"></div>
+            </div>
+
+            <button
+            class="btn btn-primary"
+            id="backBtn"
+            style="display:none;background:#2ecc71;">
+
+                🔄 LÀM TIẾP VIDEO KHÁC
+
+            </button>
+
         </div>
+
     </div>
+
 </div>
 
 <video id="vid" playsinline style="display:none"></video>
 
 <script>
-// --- ĐĂNG KÝ SERVICE WORKER ĐỂ HIỆN NÚT CÀI ĐẶT ---
-if ('serviceWorker' in navigator) {
-    const swCode = `
-        self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-        self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-    `;
-    const blob = new Blob([swCode], { type: 'text/javascript' });
-    navigator.serviceWorker.register(URL.createObjectURL(blob));
+// =======================
+// PWA SERVICE WORKER
+// =======================
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker
+        .register("./sw.js")
+        .then(() => {
+            console.log("Service Worker Registered");
+        })
+        .catch(err => {
+            console.log("SW ERROR:", err);
+        });
+
+    });
+
 }
 
-const CLOUD_NAME = "dmd2j39iz", UPLOAD_PRESET = "wink_preset"; 
-const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
-const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
-const startBtn = document.getElementById('startBtn'), status = document.getElementById('status'), pFill = document.getElementById('pFill'), pBar = document.getElementById('pBar');
-const seekBar = document.getElementById('seekBar'), seekFill = document.getElementById('seekFill'), backBtn = document.getElementById('backBtn'), playBtn = document.getElementById('playBtn');
-const curTimeText = document.getElementById('curTime'), durTimeText = document.getElementById('durTime');
+// =======================
+// CLOUDINARY
+// =======================
 
-let gl, program, audioCtx, source, dest;
+const CLOUD_NAME = "dmd2j39iz";
+const UPLOAD_PRESET = "wink_preset";
 
-function formatTime(t) {
-    if(!t || isNaN(t)) return "00:00";
-    const m = Math.floor(t / 60).toString().padStart(2, '0');
-    const s = Math.floor(t % 60).toString().padStart(2, '0');
+// =======================
+// ELEMENTS
+// =======================
+
+const vid = document.getElementById("vid");
+const cv = document.getElementById("cv");
+const fIn = document.getElementById("fIn");
+
+const s1 = document.getElementById("s1");
+const s2 = document.getElementById("s2");
+const s3 = document.getElementById("s3");
+
+const startBtn = document.getElementById("startBtn");
+const status = document.getElementById("status");
+
+const pFill = document.getElementById("pFill");
+const pBar = document.getElementById("pBar");
+
+const seekBar = document.getElementById("seekBar");
+const seekFill = document.getElementById("seekFill");
+
+const backBtn = document.getElementById("backBtn");
+const playBtn = document.getElementById("playBtn");
+
+const curTimeText = document.getElementById("curTime");
+const durTimeText = document.getElementById("durTime");
+
+let gl;
+let program;
+let tex;
+
+// =======================
+// TIME FORMAT
+// =======================
+
+function formatTime(t){
+
+    const m = Math.floor(t / 60)
+    .toString()
+    .padStart(2,"0");
+
+    const s = Math.floor(t % 60)
+    .toString()
+    .padStart(2,"0");
+
     return m + ":" + s;
+
 }
+
+// =======================
+// VIDEO UPLOAD
+// =======================
 
 fIn.onchange = e => {
+
     const file = e.target.files[0];
+
     if(!file) return;
+
     vid.src = URL.createObjectURL(file);
+
     vid.onloadeddata = () => {
-        document.getElementById('upZone').style.display = 'none';
-        document.getElementById('appUI').style.display = 'block';
+
+        document.getElementById("upZone").style.display = "none";
+        document.getElementById("appUI").style.display = "block";
+
         durTimeText.innerText = formatTime(vid.duration);
+
         if(!gl) initGL();
-        vid.play(); playBtn.innerText = "⏸";
-        setupAudio();
+
+        vid.play();
+
+        playBtn.innerText = "⏸";
+
     };
+
 };
 
-function setupAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        dest = audioCtx.createMediaStreamDestination();
-        source = audioCtx.createMediaElementSource(vid);
-        source.connect(dest);
-        source.connect(audioCtx.destination);
-    }
-}
+// =======================
+// PLAY / PAUSE
+// =======================
 
 playBtn.onclick = () => {
-    if(vid.paused) { vid.play(); playBtn.innerText = "⏸"; }
-    else { vid.pause(); playBtn.innerText = "▶"; }
+
+    if(vid.paused){
+
+        vid.play();
+        playBtn.innerText = "⏸";
+
+    } else {
+
+        vid.pause();
+        playBtn.innerText = "▶";
+
+    }
+
 };
+
+// =======================
+// VIDEO UPDATE
+// =======================
 
 vid.ontimeupdate = () => {
-    seekFill.style.width = (vid.currentTime / vid.duration * 100) + '%';
-    curTimeText.innerText = formatTime(vid.currentTime);
+
+    seekFill.style.width =
+    (vid.currentTime / vid.duration * 100) + "%";
+
+    curTimeText.innerText =
+    formatTime(vid.currentTime);
+
 };
 
-seekBar.onclick = e => vid.currentTime = ((e.clientX - seekBar.getBoundingClientRect().left) / seekBar.offsetWidth) * vid.duration;
+// =======================
+// SEEK
+// =======================
 
-s1.oninput = () => document.getElementById('v1').innerText = s1.value;
-s2.oninput = () => document.getElementById('v2').innerText = s2.value;
-s3.oninput = () => document.getElementById('v3').innerText = s3.value;
+seekBar.onclick = e => {
 
-function initGL() {
-    gl = cv.getContext('webgl', {preserveDrawingBuffer: true});
-    const vs = gl.createShader(gl.VERTEX_SHADER), fs = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(vs, `attribute vec2 p,u;varying vec2 v;void main(){v=u;gl_Position=vec4(p,0,1);}`); gl.compileShader(vs);
-    gl.shaderSource(fs, `precision mediump float;uniform sampler2D t;uniform vec2 r;uniform float s,n,c;varying vec2 v;void main(){vec2 px=1.0/r;vec4 o=texture2D(t,v);vec3 bl=texture2D(t,v-px).rgb*0.5+texture2D(t,v+px).rgb*0.5;vec3 res=o.rgb;if(n>0.0)res=mix(res,bl,n*0.5);res=res+s*(res-bl);res=(res-0.5)*c+0.5;gl_FragColor=vec4(res,1.0);}`); gl.compileShader(fs);
-    program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program); gl.useProgram(program);
-    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,0,1,1,-1,1,1,-1,1,0,0,1,1,1,0]), gl.STATIC_DRAW);
-    const p = gl.getAttribLocation(program,'p'), u = gl.getAttribLocation(program,'u');
-    gl.vertexAttribPointer(p,2,gl.FLOAT,0,16,0); gl.vertexAttribPointer(u,2,gl.FLOAT,0,16,8);
-    gl.enableVertexAttribArray(p); gl.enableVertexAttribArray(u);
-    const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, 10242, 33071); gl.texParameteri(gl.TEXTURE_2D, 10243, 33071);
-    gl.texParameteri(gl.TEXTURE_2D, 10241, 9729); gl.texParameteri(gl.TEXTURE_2D, 10240, 9729);
-    
-    requestAnimationFrame(function d(){
-        if(vid.readyState >= 2){
-            cv.width = vid.videoWidth; cv.height = vid.videoHeight;
-            gl.viewport(0,0,cv.width,cv.height);
-            gl.texImage2D(gl.TEXTURE_2D,0,6408,6408,5121,vid);
-            gl.uniform2f(gl.getUniformLocation(program,'r'), cv.width, cv.height);
-            gl.uniform1f(gl.getUniformLocation(program,'s'), s1.value);
-            gl.uniform1f(gl.getUniformLocation(program,'n'), s2.value);
-            gl.uniform1f(gl.getUniformLocation(program,'c'), s3.value);
-            gl.drawArrays(5,0,4);
-        }
-        requestAnimationFrame(d);
+    const pos =
+    (e.clientX - seekBar.getBoundingClientRect().left)
+    / seekBar.offsetWidth;
+
+    vid.currentTime = pos * vid.duration;
+
+};
+
+// =======================
+// SLIDER TEXT
+// =======================
+
+s1.oninput = () => {
+    document.getElementById("v1").innerText = s1.value;
+};
+
+s2.oninput = () => {
+    document.getElementById("v2").innerText = s2.value;
+};
+
+s3.oninput = () => {
+    document.getElementById("v3").innerText = s3.value;
+};
+
+// =======================
+// WEBGL INIT
+// =======================
+
+function initGL(){
+
+    gl = cv.getContext("webgl", {
+        preserveDrawingBuffer:true
     });
+
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+
+    gl.shaderSource(vs,
+`
+attribute vec2 p,u;
+varying vec2 v;
+
+void main(){
+
+    v=u;
+    gl_Position=vec4(p,0,1);
+
+}
+`
+);
+
+    gl.compileShader(vs);
+
+    gl.shaderSource(fs,
+`
+precision mediump float;
+
+uniform sampler2D t;
+uniform vec2 r;
+
+uniform float s;
+uniform float n;
+uniform float c;
+
+varying vec2 v;
+
+void main(){
+
+    vec2 px=1.0/r;
+
+    vec4 o=texture2D(t,v);
+
+    vec3 bl=
+    texture2D(t,v-px).rgb*0.5+
+    texture2D(t,v+px).rgb*0.5;
+
+    vec3 res=o.rgb;
+
+    if(n>0.0){
+
+        res=mix(res,bl,n*0.5);
+
+    }
+
+    res=res+s*(res-bl);
+
+    res=(res-0.5)*c+0.5;
+
+    gl_FragColor=vec4(res,1.0);
+
+}
+`
+);
+
+    gl.compileShader(fs);
+
+    program = gl.createProgram();
+
+    gl.attachShader(program,vs);
+    gl.attachShader(program,fs);
+
+    gl.linkProgram(program);
+
+    gl.useProgram(program);
+
+    const buf = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([
+            -1,-1,0,1,
+             1,-1,1,1,
+            -1, 1,0,0,
+             1, 1,1,0
+        ]),
+        gl.STATIC_DRAW
+    );
+
+    const p = gl.getAttribLocation(program,"p");
+    const u = gl.getAttribLocation(program,"u");
+
+    gl.vertexAttribPointer(p,2,gl.FLOAT,0,16,0);
+    gl.vertexAttribPointer(u,2,gl.FLOAT,0,16,8);
+
+    gl.enableVertexAttribArray(p);
+    gl.enableVertexAttribArray(u);
+
+    tex = gl.createTexture();
+
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+
+    gl.texParameteri(gl.TEXTURE_2D,10242,33071);
+    gl.texParameteri(gl.TEXTURE_2D,10243,33071);
+
+    gl.texParameteri(gl.TEXTURE_2D,10241,9729);
+    gl.texParameteri(gl.TEXTURE_2D,10240,9729);
+
+    requestAnimationFrame(drawLoop);
+
 }
 
-startBtn.onclick = async () => {
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    startBtn.disabled = true; pBar.style.display = 'block';
-    
-    const stream = cv.captureStream(30);
-    if (dest) {
-        dest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
+// =======================
+// DRAW LOOP
+// =======================
+
+function drawLoop(){
+
+    if(vid.readyState >= 2){
+
+        cv.width = vid.videoWidth;
+        cv.height = vid.videoHeight;
+
+        gl.viewport(0,0,cv.width,cv.height);
+
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            6408,
+            6408,
+            5121,
+            vid
+        );
+
+        gl.uniform2f(
+            gl.getUniformLocation(program,"r"),
+            cv.width,
+            cv.height
+        );
+
+        gl.uniform1f(
+            gl.getUniformLocation(program,"s"),
+            s1.value
+        );
+
+        gl.uniform1f(
+            gl.getUniformLocation(program,"n"),
+            s2.value
+        );
+
+        gl.uniform1f(
+            gl.getUniformLocation(program,"c"),
+            s3.value
+        );
+
+        gl.drawArrays(5,0,4);
+
     }
-    
-    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12000000 });
-    const chunks = []; 
+
+    requestAnimationFrame(drawLoop);
+
+}
+
+// =======================
+// EXPORT VIDEO
+// =======================
+
+startBtn.onclick = async () => {
+
+    startBtn.disabled = true;
+
+    pBar.style.display = "block";
+
+    const stream = cv.captureStream(30);
+
+    const audioCtx =
+    new (window.AudioContext || window.webkitAudioContext)();
+
+    const source =
+    audioCtx.createMediaElementSource(vid);
+
+    const dest =
+    audioCtx.createMediaStreamDestination();
+
+    source.connect(dest);
+    source.connect(audioCtx.destination);
+
+    dest.stream
+    .getAudioTracks()
+    .forEach(track => stream.addTrack(track));
+
+    const rec = new MediaRecorder(stream,{
+        mimeType:"video/webm;codecs=vp9,opus",
+        videoBitsPerSecond:12000000
+    });
+
+    const chunks = [];
+
     rec.ondataavailable = e => chunks.push(e.data);
-    
-    vid.currentTime = 0; vid.muted = false; vid.play(); rec.start();
+
+    vid.currentTime = 0;
+
+    vid.muted = false;
+
+    vid.play();
+
+    rec.start();
 
     const inv = setInterval(() => {
-        let p = (vid.currentTime / vid.duration) * 100;
-        pFill.style.width = (p * 0.5) + '%';
-        status.innerText = `Đang xử lý: ${Math.round(p)}%`;
-    }, 100);
+
+        let p =
+        (vid.currentTime / vid.duration) * 100;
+
+        pFill.style.width =
+        (p * 0.5) + "%";
+
+        status.innerText =
+        `Đang xử lý video & tiếng: ${Math.round(p)}%`;
+
+    },100);
 
     vid.onended = () => {
-        clearInterval(inv); rec.stop(); vid.muted = true;
+
+        clearInterval(inv);
+
+        rec.stop();
+
         rec.onstop = async () => {
-            status.innerText = "Đang gộp file MP4...";
-            const fd = new FormData(); 
-            fd.append('file', new Blob(chunks, {type:'video/webm'})); 
-            fd.append('upload_preset', UPLOAD_PRESET);
-            try {
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {method:'POST', body:fd}).then(r=>r.json());
-                const a = document.createElement('a'); 
-                a.href = res.secure_url.replace('.webm', '.mp4'); 
-                a.download = "Wink_Video.mp4"; 
-                a.click();
-                status.innerHTML = "<b style='color:#00ff00'>XUẤT FILE THÀNH CÔNG!</b>"; 
-                pFill.style.width = '100%';
-                document.getElementById('actionButtons').style.display='none'; 
-                backBtn.style.display='block';
-            } catch (err) {
-                status.innerText = "Lỗi xuất file!";
-                startBtn.disabled = false;
-            }
+
+            status.innerText = "Đang upload MP4...";
+
+            const fd = new FormData();
+
+            fd.append(
+                "file",
+                new Blob(chunks,{
+                    type:"video/webm"
+                })
+            );
+
+            fd.append(
+                "upload_preset",
+                UPLOAD_PRESET
+            );
+
+            const res = await fetch(
+                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`,
+                {
+                    method:"POST",
+                    body:fd
+                }
+            ).then(r=>r.json());
+
+            const a = document.createElement("a");
+
+            a.href =
+            res.secure_url.replace(".webm",".mp4");
+
+            a.download = "Wink_Pro_Final.mp4";
+
+            a.click();
+
+            status.innerHTML =
+            "<b style='color:#00ff00'>XUẤT FILE THÀNH CÔNG!</b>";
+
+            pFill.style.width = "100%";
+
+            document.getElementById("actionButtons")
+            .style.display = "none";
+
+            backBtn.style.display = "block";
+
         };
+
     };
+
 };
 
+// =======================
+// RESET
+// =======================
+
 backBtn.onclick = () => location.reload();
-document.getElementById('reSelect').onclick = () => location.reload();
+
+document.getElementById("reSelect").onclick =
+() => location.reload();
+
 </script>
+
 </body>
 </html>
