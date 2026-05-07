@@ -100,6 +100,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .toast.ok{color:var(--green);border-color:#1a3a2a}
 .toast.err{color:var(--red);border-color:#3a1a1a}
 .toast.warn{color:var(--yellow);border-color:#3a2f1a}
+#retryBtn:active{transform:scale(.96)}
 </style>
 </head>
 <body>
@@ -121,6 +122,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
     <div class="track"><div class="fill" id="loadFill"></div></div>
     <small style="font-size:11px;color:var(--muted)">Chỉ tải 1 lần, lần sau sẽ dùng cache (~25MB)</small>
+    <button id="retryBtn" onclick="loadFFmpeg(0)" style="display:none;margin-top:4px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">↻ Thử lại</button>
   </div>
 
   <div class="upload-zone" id="uploadZone">
@@ -218,7 +220,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 
 <div class="toast" id="toast"></div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
 const { createFFmpeg, fetchFile } = FFmpeg;
 
@@ -231,16 +233,23 @@ let exporting = false;
 let selectedPreset = 'ultrafast';
 const kernelSizes = [3, 5, 7];
 
-const ffmpeg = createFFmpeg({
-  corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
-  log: false,
-  progress: ({ ratio }) => {
-    const pct = Math.min(100, Math.round(ratio * 100));
-    expFill.style.width = pct + '%';
-    expPct.textContent = pct + '%';
-    if (pct > 0 && pct < 100) expLabel.textContent = 'Đang encode H.264...';
-  }
-});
+const CORE_URLS = [
+  'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+  'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+];
+let ffmpeg = null;
+function makeFFmpeg(corePath) {
+  return createFFmpeg({
+    corePath,
+    log: false,
+    progress: ({ ratio }) => {
+      const pct = Math.min(100, Math.round(ratio * 100));
+      expFill.style.width = pct + '%';
+      expPct.textContent = pct + '%';
+      if (pct > 0 && pct < 100) expLabel.textContent = 'Đang encode H.264...';
+    }
+  });
+}
 
 // ── Shaders ──
 const VS = `
@@ -350,22 +359,40 @@ function renderFrame() {
   rafId = requestAnimationFrame(renderFrame);
 }
 
-// ── Load ffmpeg (background) ──
-async function loadFFmpeg() {
+// ── Load ffmpeg with multi-CDN fallback ──
+async function loadFFmpeg(urlIndex = 0) {
+  ffmpegReady = false;
   ffmpegLoad.classList.add('show');
+  document.getElementById('retryBtn').style.display = 'none';
+  const url = CORE_URLS[urlIndex];
+  const shortName = url.includes('jsdelivr') ? 'jsDelivr CDN' : 'unpkg CDN';
+  loadLabel.textContent = 'Đang tải FFmpeg từ ' + shortName + '...';
+  loadPct.textContent = '0%';
+  loadFill.style.width = '0%';
+
   let fake = 0;
-  const fakeInt = setInterval(()=>{ fake=Math.min(fake+2,90); loadFill.style.width=fake+'%'; loadPct.textContent=fake+'%'; },300);
+  const fakeInt = setInterval(()=>{ fake=Math.min(fake+1.5,88); loadFill.style.width=fake+'%'; loadPct.textContent=Math.round(fake)+'%'; },400);
+
   try {
+    ffmpeg = makeFFmpeg(url);
     await ffmpeg.load();
     clearInterval(fakeInt);
     loadFill.style.width='100%'; loadPct.textContent='100%';
-    loadLabel.textContent='FFmpeg sẵn sàng ✓';
-    setTimeout(()=>ffmpegLoad.classList.remove('show'),1500);
+    loadLabel.textContent='✓ FFmpeg sẵn sàng (' + shortName + ')';
     ffmpegReady = true;
+    setTimeout(()=>ffmpegLoad.classList.remove('show'), 1800);
   } catch(e) {
     clearInterval(fakeInt);
-    loadLabel.textContent='Lỗi tải FFmpeg — kiểm tra kết nối mạng';
-    showToast('Không tải được FFmpeg engine','err');
+    const nextIdx = urlIndex + 1;
+    if (nextIdx < CORE_URLS.length) {
+      loadLabel.textContent = shortName + ' thất bại, thử CDN khác...';
+      setTimeout(() => loadFFmpeg(nextIdx), 1000);
+    } else {
+      loadLabel.textContent = 'Không tải được FFmpeg. Kiểm tra mạng rồi nhấn Thử lại.';
+      loadPct.textContent = '!';
+      loadFill.style.background = 'var(--red)';
+      document.getElementById('retryBtn').style.display = 'block';
+    }
   }
 }
 
