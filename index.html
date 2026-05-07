@@ -9,20 +9,20 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Wink 2.0 PRO</title>
 
-<link rel="manifest" href='data:application/manifest+json,{"name":"Wink 2.0 PRO","short_name":"Wink","start_url":".","display":"standalone","background_color":"#0c0c14","theme_color":"#ee4d2d","icons":[{"src":"icon.jpg","sizes":"192x192","type":"image/jpeg"}]}'>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Wink 2.0 PRO","short_name":"Wink","start_url":".","display":"standalone","background_color":"#0c0c14","theme_color":"#ee4d2d","icons":[{"src":"icon.png","sizes":"192x192","type":"image/png"},{"src":"icon.png","sizes":"512x512","type":"image/png"}]}'>
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg: #0c0c14; --surface: #14141f; --accent: #ee4d2d; --text: #e8e6f8; --border: #2a2840; }
 body { background: var(--bg); color: var(--text); font-family: sans-serif; overflow-y: auto; min-height: 100vh; }
 
-/* UI chuẩn bản cũ bạn thích */
+/* Header lấy từ bản bạn yêu cầu */
 .header { background: var(--surface); padding: 12px 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
 .logo { width: 35px; height: 35px; border-radius: 8px; border: 1px solid var(--accent); object-fit: cover; }
 .header h2 { font-size: 1.1rem; }
 
 .main { padding: 15px; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px; }
-.card { background: var(--surface); border-radius: 20px; padding: 15px; border: 1px solid var(--border); }
+.card { background: var(--surface); border-radius: 20px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 canvas { width: 100%; border-radius: 12px; background: #000; display: block; }
 
 .video-ctrl { margin: 15px 0; }
@@ -34,14 +34,15 @@ canvas { width: 100%; border-radius: 12px; background: #000; display: block; }
 
 .slider-group { margin-top: 18px; }
 .label-row { display: flex; justify-content: space-between; font-size: 13px; color: #bbb; margin-bottom: 8px; }
-input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
+b { color: var(--accent); }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; cursor: pointer; }
 
 .btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.2s; }
-.btn-primary { background: var(--accent); color: white; }
+.btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(238, 77, 45, 0.3); }
 .btn-outline { background: transparent; border: 1px solid #444; color: #aaa; }
 .btn:active { transform: scale(0.98); }
 
-#status { font-size: 14px; color: #aaa; text-align: center; margin: 15px 0; font-style: italic; }
+#status { font-size: 14px; color: #aaa; text-align: center; margin: 15px 0; min-height: 20px; }
 .prog-bar { height: 8px; background: #000; border-radius: 4px; display: none; overflow: hidden; }
 .prog-fill { height: 100%; background: var(--accent); width: 0%; transition: 0.1s; }
 </style>
@@ -49,7 +50,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
 <body>
 
 <div class="header">
-    <img src="icon.jpg" class="logo" alt="Icon" onerror="this.src='https://via.placeholder.com/35/ee4d2d/ffffff?text=W'">
+    <img src="icon.png" class="logo" alt="Icon" onerror="this.src='https://via.placeholder.com/35/ee4d2d/ffffff?text=W'">
     <h2>Wink 2.0 <span style="color:var(--accent)">PRO</span></h2>
 </div>
 
@@ -74,9 +75,9 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
                 </div>
             </div>
             
-            <div class="slider-group"><div class="label-row"><span>ĐỘ NÉT</span> <b id="v1" style="color:var(--accent)">1.5</b></div><input type="range" id="s1" min="0" max="5" step="0.1" value="1.5"></div>
-            <div class="slider-group"><div class="label-row"><span>KHỬ NHIỄU</span> <b id="v2" style="color:var(--accent)">0.3</b></div><input type="range" id="s2" min="0" max="1" step="0.05" value="0.3"></div>
-            <div class="slider-group"><div class="label-row"><span>TƯƠNG PHẢN</span> <b id="v3" style="color:var(--accent)">1.0</b></div><input type="range" id="s3" min="0.5" max="2.0" step="0.1" value="1.0"></div>
+            <div class="slider-group"><div class="label-row"><span>ĐỘ NÉT</span> <b id="v1">1.5</b></div><input type="range" id="s1" min="0" max="5" step="0.1" value="1.5"></div>
+            <div class="slider-group"><div class="label-row"><span>KHỬ NHIỄU</span> <b id="v2">0.3</b></div><input type="range" id="s2" min="0" max="1" step="0.05" value="0.3"></div>
+            <div class="slider-group"><div class="label-row"><span>TƯƠNG PHẢN</span> <b id="v3">1.0</b></div><input type="range" id="s3" min="0.5" max="2.0" step="0.1" value="1.0"></div>
 
             <div id="actionButtons" style="margin-top: 15px;">
                 <button class="btn btn-primary" id="startBtn">🚀 XUẤT MP4 </button>
@@ -92,10 +93,11 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 10px; }
 <video id="vid" playsinline style="display:none"></video>
 
 <script>
-// 1. ĐĂNG KÝ SERVICE WORKER ĐỂ KÍCH HOẠT CHẾ ĐỘ CÀI ĐẶT APP (PWA)
+// --- ĐĂNG KÝ SERVICE WORKER ĐỂ HIỆN NÚT CÀI ĐẶT ---
 if ('serviceWorker' in navigator) {
     const swCode = `
-        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
         self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
     `;
     const blob = new Blob([swCode], { type: 'text/javascript' });
@@ -109,10 +111,10 @@ const startBtn = document.getElementById('startBtn'), status = document.getEleme
 const seekBar = document.getElementById('seekBar'), seekFill = document.getElementById('seekFill'), backBtn = document.getElementById('backBtn'), playBtn = document.getElementById('playBtn');
 const curTimeText = document.getElementById('curTime'), durTimeText = document.getElementById('durTime');
 
-let gl, program, tex;
+let gl, program, audioCtx, source, dest;
 
 function formatTime(t) {
-    if (isNaN(t)) return "00:00";
+    if(!t || isNaN(t)) return "00:00";
     const m = Math.floor(t / 60).toString().padStart(2, '0');
     const s = Math.floor(t % 60).toString().padStart(2, '0');
     return m + ":" + s;
@@ -128,8 +130,19 @@ fIn.onchange = e => {
         durTimeText.innerText = formatTime(vid.duration);
         if(!gl) initGL();
         vid.play(); playBtn.innerText = "⏸";
+        setupAudio();
     };
 };
+
+function setupAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        dest = audioCtx.createMediaStreamDestination();
+        source = audioCtx.createMediaElementSource(vid);
+        source.connect(dest);
+        source.connect(audioCtx.destination);
+    }
+}
 
 playBtn.onclick = () => {
     if(vid.paused) { vid.play(); playBtn.innerText = "⏸"; }
@@ -141,10 +154,7 @@ vid.ontimeupdate = () => {
     curTimeText.innerText = formatTime(vid.currentTime);
 };
 
-seekBar.onclick = e => {
-    const rect = seekBar.getBoundingClientRect();
-    vid.currentTime = ((e.clientX - rect.left) / rect.width) * vid.duration;
-};
+seekBar.onclick = e => vid.currentTime = ((e.clientX - seekBar.getBoundingClientRect().left) / seekBar.offsetWidth) * vid.duration;
 
 s1.oninput = () => document.getElementById('v1').innerText = s1.value;
 s2.oninput = () => document.getElementById('v2').innerText = s2.value;
@@ -161,7 +171,7 @@ function initGL() {
     const p = gl.getAttribLocation(program,'p'), u = gl.getAttribLocation(program,'u');
     gl.vertexAttribPointer(p,2,gl.FLOAT,0,16,0); gl.vertexAttribPointer(u,2,gl.FLOAT,0,16,8);
     gl.enableVertexAttribArray(p); gl.enableVertexAttribArray(u);
-    tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+    const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, 10242, 33071); gl.texParameteri(gl.TEXTURE_2D, 10243, 33071);
     gl.texParameteri(gl.TEXTURE_2D, 10241, 9729); gl.texParameteri(gl.TEXTURE_2D, 10240, 9729);
     
@@ -181,52 +191,47 @@ function initGL() {
 }
 
 startBtn.onclick = async () => {
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     startBtn.disabled = true; pBar.style.display = 'block';
     
     const stream = cv.captureStream(30);
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioCtx.createMediaElementSource(vid);
-    const dest = audioCtx.createMediaStreamDestination();
-    source.connect(dest);
-    source.connect(audioCtx.destination);
-    dest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
+    if (dest) {
+        dest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
+    }
     
-    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 15000000 });
+    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12000000 });
     const chunks = []; 
     rec.ondataavailable = e => chunks.push(e.data);
     
-    vid.currentTime = 0; 
-    vid.muted = false; 
-    vid.play(); 
-    rec.start();
+    vid.currentTime = 0; vid.muted = false; vid.play(); rec.start();
 
     const inv = setInterval(() => {
         let p = (vid.currentTime / vid.duration) * 100;
         pFill.style.width = (p * 0.5) + '%';
-        status.innerText = `Đang render video & tiếng: ${Math.round(p)}%`;
+        status.innerText = `Đang xử lý: ${Math.round(p)}%`;
     }, 100);
 
     vid.onended = () => {
-        clearInterval(inv); rec.stop();
+        clearInterval(inv); rec.stop(); vid.muted = true;
         rec.onstop = async () => {
             status.innerText = "Đang gộp file MP4...";
             const fd = new FormData(); 
             fd.append('file', new Blob(chunks, {type:'video/webm'})); 
             fd.append('upload_preset', UPLOAD_PRESET);
-            
             try {
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {method:'POST', body:fd}).then(r=>r.json());
                 const a = document.createElement('a'); 
                 a.href = res.secure_url.replace('.webm', '.mp4'); 
-                a.download = "Wink_Pro_Final.mp4"; 
+                a.download = "Wink_Video.mp4"; 
                 a.click();
                 status.innerHTML = "<b style='color:#00ff00'>XUẤT FILE THÀNH CÔNG!</b>"; 
+                pFill.style.width = '100%';
+                document.getElementById('actionButtons').style.display='none'; 
+                backBtn.style.display='block';
             } catch (err) {
-                status.innerText = "Lỗi khi xuất file!";
+                status.innerText = "Lỗi xuất file!";
+                startBtn.disabled = false;
             }
-            pFill.style.width = '100%';
-            document.getElementById('actionButtons').style.display='none'; 
-            backBtn.style.display='block';
         };
     };
 };
