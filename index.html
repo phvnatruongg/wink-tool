@@ -4,87 +4,100 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#ee4d2d">
-<title>Wink 2.0 - Shopee MP4 Edition</title>
-<link rel="icon" type="image/jpeg" href="icon.jpg">
+<title>Wink 2.0 PRO</title>
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIldpbmsgMi4wIFBSTyIsCiAgInNob3J0X25hbWUiOiAiV2luayIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAmRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBjMGMxNCIsCiAgInRoZW1lX2NvbG9yIjogIiNlZTRkMmQiCn0=">
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg: #0c0c14; --surface: #14141f; --accent: #ee4d2d; --text: #e8e6f8; --border: #2a2840; }
-body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding-bottom: 40px; }
+body { background: var(--bg); color: var(--text); font-family: sans-serif; }
 
-.header { background: var(--surface); padding: 1rem; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-.logo { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--accent); }
+/* Header mới: Icon Miku bên trái */
+.header { background: var(--surface); padding: 12px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.logo { width: 35px; height: 35px; border-radius: 8px; border: 1px solid var(--accent); object-fit: cover; }
+.header h2 { font-size: 1.1rem; letter-spacing: 0.5px; }
 
-.main { padding: 15px; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
-.card { background: var(--surface); border-radius: 24px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.main { padding: 15px; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--surface); border-radius: 20px; padding: 15px; border: 1px solid var(--border); }
+canvas { width: 100%; border-radius: 12px; background: #000; display: block; }
 
-#upZone { text-align: center; padding: 60px 20px; border: 2px dashed #333; border-radius: 20px; cursor: pointer; transition: 0.3s; }
-#upZone:active { background: rgba(238, 77, 45, 0.05); border-color: var(--accent); }
+.video-ctrl { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+#playBtn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; min-width: 30px; }
+.seek-bar { flex-grow: 1; height: 5px; background: #333; border-radius: 3px; position: relative; cursor: pointer; }
+.seek-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; }
 
-canvas { width: 100%; border-radius: 16px; background: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.slider-group { margin-top: 12px; }
+.label-row { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 4px; }
+input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; height: 6px; }
 
-.slider-group { margin-top: 15px; }
-.label-row { display: flex; justify-content: space-between; font-size: 13px; color: #888; margin-bottom: 6px; }
-.val { color: var(--accent); font-weight: bold; }
+.btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+.btn-primary { background: var(--accent); color: white; margin-top: 10px; }
+.btn-outline { background: transparent; border: 1px solid #444; color: #aaa; margin-top: 8px; }
 
-input[type=range] { width: 100%; accent-color: var(--accent); height: 6px; cursor: pointer; }
-
-.btn { width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(238, 77, 45, 0.3); }
-.btn:disabled { background: #2a2840; color: #555; box-shadow: none; }
-
-#status { font-size: 13px; color: #aaa; text-align: center; margin-top: 15px; line-height: 1.5; min-height: 40px; }
-.prog-bar { height: 8px; background: #000; border-radius: 4px; margin-top: 10px; display: none; overflow: hidden; border: 1px solid var(--border); }
-.prog-fill { height: 100%; background: linear-gradient(90deg, #ee4d2d, #ff7357); width: 0%; transition: width 0.2s; }
+#status { font-size: 13px; color: #aaa; text-align: center; margin: 15px 0; min-height: 20px; line-height: 1.4; }
+.prog-bar { height: 6px; background: #000; border-radius: 3px; display: none; overflow: hidden; margin-bottom: 10px; }
+.prog-fill { height: 100%; background: var(--accent); width: 0%; transition: 0.2s; }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <img src="icon.jpg" class="logo" onerror="this.style.display='none'">
-    <h2 style="font-size: 1.2rem; letter-spacing: 0.5px;">Wink 2.0 <span style="color:var(--accent)">PRO</span></h2>
+    <img src="icon.jpg" class="logo" alt="Miku">
+    <h2>Wink 2.0 <span style="color:var(--accent)">PRO</span></h2>
 </div>
 
 <div class="main">
-    <div id="upZone" class="card" onclick="document.getElementById('fIn').click()">
+    <div id="upZone" class="card" style="text-align:center; padding: 60px 20px;" onclick="document.getElementById('fIn').click()">
         <input type="file" id="fIn" accept="video/*" style="display:none">
-        <div style="font-size: 48px; margin-bottom: 15px;">📹</div>
-        <p style="font-weight: bold; font-size: 17px;">Chọn video Shopee</p>
-        <p style="font-size: 13px; color: #666; margin-top: 8px;">Tự động xuất MP4 chuẩn H.264</p>
+        <div style="font-size: 40px;">🎬</div>
+        <p style="margin-top:10px; font-weight: bold;">Chọn video cần làm nét</p>
     </div>
 
     <div id="appUI" style="display:none;">
         <div class="card">
             <canvas id="cv"></canvas>
             
+            <div class="video-ctrl">
+                <button id="playBtn">⏸</button>
+                <div class="seek-bar" id="seekBar"><div class="seek-fill" id="seekFill"></div></div>
+            </div>
+            
             <div class="slider-group">
-                <div class="label-row"><span>ĐỘ NÉT CĂNG</span> <span class="val" id="v1">1.5</span></div>
+                <div class="label-row"><span>ĐỘ NÉT</span> <b id="v1">1.5</b></div>
                 <input type="range" id="s1" min="0" max="5" step="0.1" value="1.5">
             </div>
-
             <div class="slider-group">
-                <div class="label-row"><span>KHỬ NHIỄU MỊN</span> <span class="val" id="v2">0.3</span></div>
+                <div class="label-row"><span>KHỬ NHIỄU</span> <b id="v2">0.3</b></div>
                 <input type="range" id="s2" min="0" max="1" step="0.05" value="0.3">
             </div>
+            <div class="slider-group">
+                <div class="label-row"><span>TƯƠNG PHẢN</span> <b id="v3">1.0</b></div>
+                <input type="range" id="s3" min="0.5" max="2.0" step="0.1" value="1.0">
+            </div>
 
-            <button class="btn btn-primary" id="startBtn">🚀 XUẤT MP4 NÉT CHO SHOPEE</button>
-            
+            <div id="actionButtons">
+                <button class="btn btn-primary" id="startBtn">🚀 XUẤT MP4 NÉT</button>
+                <button class="btn btn-outline" id="reSelect">📂 ĐỔI VIDEO KHÁC</button>
+            </div>
+
+            <div id="status">Sẵn sàng nâng cấp...</div>
             <div class="prog-bar" id="pBar"><div class="prog-fill" id="pFill"></div></div>
-            <div id="status">Sẵn sàng nâng cấp chất lượng</div>
+            
+            <button class="btn btn-primary" id="backBtn" style="display:none; background: #2ecc71;">🔄 TIẾP TỤC VIDEO KHÁC</button>
         </div>
     </div>
 </div>
 
-<video id="vid" playsinline style="display:none"></video>
+<video id="vid" playsinline muted style="display:none"></video>
 
 <script>
-// --- CẤU HÌNH ĐÃ THAY TÊN CỦA BẠN ---
 const CLOUD_NAME = "dmd2j39iz"; 
 const UPLOAD_PRESET = "wink_preset"; 
 
 const vid = document.getElementById('vid'), cv = document.getElementById('cv'), fIn = document.getElementById('fIn');
-const s1 = document.getElementById('s1'), s2 = document.getElementById('s2');
+const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'), s3 = document.getElementById('s3');
 const startBtn = document.getElementById('startBtn'), status = document.getElementById('status'), pFill = document.getElementById('pFill'), pBar = document.getElementById('pBar');
+const seekBar = document.getElementById('seekBar'), seekFill = document.getElementById('seekFill'), backBtn = document.getElementById('backBtn'), reSelect = document.getElementById('reSelect'), playBtn = document.getElementById('playBtn');
 
 fIn.onchange = e => {
     const file = e.target.files[0];
@@ -93,32 +106,53 @@ fIn.onchange = e => {
     vid.onloadedmetadata = () => {
         document.getElementById('upZone').style.display = 'none';
         document.getElementById('appUI').style.display = 'block';
-        initGL(); render(); vid.play();
+        initGL(); render(); vid.play(); playBtn.innerText = "⏸";
     };
 };
 
-s1.oninput = () => document.getElementById('v1').innerText = parseFloat(s1.value).toFixed(1);
-s2.oninput = () => document.getElementById('v2').innerText = parseFloat(s2.value).toFixed(1);
+reSelect.onclick = () => {
+    vid.pause();
+    document.getElementById('upZone').style.display = 'block';
+    document.getElementById('appUI').style.display = 'none';
+    fIn.value = "";
+};
+
+playBtn.onclick = () => {
+    if(vid.paused) { vid.play(); playBtn.innerText = "⏸"; }
+    else { vid.pause(); playBtn.innerText = "▶"; }
+};
+
+vid.ontimeupdate = () => {
+    const p = (vid.currentTime / vid.duration) * 100;
+    seekFill.style.width = p + '%';
+};
+
+seekBar.onclick = e => {
+    const rect = seekBar.getBoundingClientRect();
+    const p = (e.clientX - rect.left) / rect.width;
+    vid.currentTime = p * vid.duration;
+};
+
+s1.oninput = () => document.getElementById('v1').innerText = s1.value;
+s2.oninput = () => document.getElementById('v2').innerText = s2.value;
+s3.oninput = () => document.getElementById('v3').innerText = s3.value;
 
 startBtn.onclick = async () => {
     startBtn.disabled = true;
+    reSelect.style.display = 'none';
     pBar.style.display = 'block';
-    status.innerHTML = "<b>BƯỚC 1:</b> Đang xử lý làm nét nội bộ...";
+    status.innerHTML = "<b>BƯỚC 1:</b> Đang Render nội bộ...";
 
     const stream = cv.captureStream(30);
-    const rec = new MediaRecorder(stream, { 
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 10000000 
-    });
-    
+    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 10000000 });
     const chunks = [];
     rec.ondataavailable = e => chunks.push(e.data);
     vid.currentTime = 0; vid.play(); rec.start();
 
     const inv = setInterval(() => {
         const p = Math.round(vid.currentTime / vid.duration * 100);
-        pFill.style.width = (p * 0.5) + '%'; // 50% đầu cho render
-        status.innerText = `Đang xử lý làm nét: ${p}%`;
+        pFill.style.width = (p * 0.5) + '%';
+        status.innerText = `Render: ${p}%`;
     }, 100);
 
     vid.onended = () => {
@@ -132,38 +166,36 @@ startBtn.onclick = async () => {
 };
 
 async function uploadToCloudinary(blob) {
-    status.innerHTML = "<b>BƯỚC 2:</b> Đang chuyển đổi sang MP4 Online...<br><span style='font-size:11px'>(Vui lòng giữ kết nối mạng)</span>";
-    
+    status.innerHTML = "<b>BƯỚC 2:</b> Đang chuyển sang MP4 Online...";
     const formData = new FormData();
     formData.append('file', blob);
     formData.append('upload_preset', UPLOAD_PRESET);
 
     try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) throw new Error();
-
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData });
         const data = await response.json();
-        pFill.style.width = '100%';
-        
-        // Chuyển đổi link WebM sang MP4 để tải về
         const mp4Url = data.secure_url.replace(/\.[^/.]+$/, ".mp4");
         
         const a = document.createElement('a');
         a.href = mp4Url;
-        a.download = "Shopee_Pro_Net.mp4";
+        a.download = "Wink_Pro_Video.mp4";
         a.click();
 
-        status.innerHTML = "<b style='color:#00ff00'>XONG!</b> Video MP4 đã tải về máy.";
-        startBtn.disabled = false;
+        status.innerHTML = "<b style='color:#00ff00; font-size: 16px;'>✅ HOÀN TẤT! ĐÃ TẢI VỀ</b>";
+        pFill.style.width = '100%';
+        document.getElementById('actionButtons').style.display = 'none';
+        backBtn.style.display = 'block';
     } catch (err) {
-        status.innerHTML = "<b style='color:red'>LỖI:</b> Hãy kiểm tra Internet hoặc Upload Preset trên Cloudinary!";
+        status.innerText = "Lỗi upload! Thử lại sau.";
         startBtn.disabled = false;
+        reSelect.style.display = 'block';
     }
 }
+
+// Nút quay lại để làm video mới
+backBtn.onclick = () => {
+    location.reload();
+};
 
 // --- WEBGL CORE ---
 let gl, program;
@@ -172,7 +204,7 @@ function initGL() {
     const vs = gl.createShader(gl.VERTEX_SHADER), fs = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(vs, `attribute vec2 p,u;varying vec2 v;void main(){v=u;gl_Position=vec4(p,0,1);}`);
     gl.compileShader(vs);
-    gl.shaderSource(fs, `precision mediump float;uniform sampler2D t;uniform vec2 r;uniform float s,n;varying vec2 v;void main(){vec2 px=1.0/r;vec4 o=texture2D(t,v);vec3 bl=texture2D(t,v-px).rgb*0.5+texture2D(t,v+px).rgb*0.5;vec3 c=o.rgb;if(n>0.0)c=mix(c,bl,n*0.5);gl_FragColor=vec4(c+s*(c-bl),o.a);}`);
+    gl.shaderSource(fs, `precision mediump float;uniform sampler2D t;uniform vec2 r;uniform float s,n,c;varying vec2 v;void main(){vec2 px=1.0/r;vec4 o=texture2D(t,v);vec3 bl=texture2D(t,v-px).rgb*0.5+texture2D(t,v+px).rgb*0.5;vec3 res=o.rgb;if(n>0.0)res=mix(res,bl,n*0.5);res=res+s*(res-bl);res=(res-0.5)*c+0.5;gl_FragColor=vec4(res,o.a);}`);
     gl.compileShader(fs);
     program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program); gl.useProgram(program);
     const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -182,7 +214,6 @@ function initGL() {
     gl.enableVertexAttribArray(p); gl.enableVertexAttribArray(u);
     gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
     gl.texParameteri(gl.TEXTURE_2D, 10242, 33071); gl.texParameteri(gl.TEXTURE_2D, 10243, 33071);
-    gl.texParameteri(gl.TEXTURE_2D, 10241, 9729); gl.texParameteri(gl.TEXTURE_2D, 10240, 9729);
 }
 function render() {
     if(vid.readyState < 2) { requestAnimationFrame(render); return; }
@@ -192,6 +223,7 @@ function render() {
     gl.uniform2f(gl.getUniformLocation(program,'r'), cv.width, cv.height);
     gl.uniform1f(gl.getUniformLocation(program,'s'), s1.value);
     gl.uniform1f(gl.getUniformLocation(program,'n'), s2.value);
+    gl.uniform1f(gl.getUniformLocation(program,'c'), s3.value);
     gl.drawArrays(5,0,4);
     requestAnimationFrame(render);
 }
